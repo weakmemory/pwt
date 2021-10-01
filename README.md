@@ -8,7 +8,7 @@ Alan Jeffrey, James Riely, Mark Batty, Simon Cooksey, Anton Podkopaev, and Ilya 
 ### Requirements
 * [Coq 8.13.1](https://coq.inria.fr)
 * [Hahn library](https://github.com/vafeiadis/hahn) (`coq-hahn`)
-* [Intermediate Memory Model](https://github.com/weakmemory/imm) (`coq-imm.1.3`)
+* [Intermediate Memory Model](https://github.com/weakmemory/imm) (`coq-imm.1.4`)
 
 All required dependencies can be installed via package manager [`opam`](https://opam.ocaml.org/). 
 

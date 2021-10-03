@@ -6,16 +6,18 @@ Require Import AuxDef.
 Require Import AuxRel.
 Require Import Language.
 
+(** This section corresponds to §4.2.
+    We introduce actions and relations on them.
+*)
 Section Action.
 Local Open Scope program_scope.
 
 Record action := mk_action
   { imm_lbl : label;
     α : thread_id;
-    σ : scope
   }.
 
-Definition def_action := mk_action (Afence Opln) tid_init grp.
+Definition def_action := mk_action (Afence Opln) tid_init.
 
 Definition mod' := mod id ∘ imm_lbl.
 

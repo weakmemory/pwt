@@ -415,7 +415,7 @@ Qed.
 
 Definition local_initialized_pomset (regs : list Reg.t) : pomset :=
   {|  events := nil;
-      λ := fun _ => mk_action (Afence Opln) tid_init Language.proc;
+      λ := fun _ => mk_action (Afence Opln) tid_init;
       κ := fun _ => Formula.tt;
       τ := fun _ φ => List.fold_left
                         (fun ψ r => Formula.subst_reg ψ r (Expr.val 0)) regs φ;

@@ -387,50 +387,6 @@ Proof.
   red. by constructor.
 Qed.
 
-Record cand :=
-  { cand_wf : wf;
-
-    cand_rf_injective : functional rf⁻¹;
-
-    (* C2a *)
-    cand_rf_matches : rf ⊆ λ ⋄ matches;
-
-    (* C2b *)
-    cand_rf_total : codom_rel rf ≡₁ R ∩₁ E;
-
-    (* C3 *)
-    cand_precondition : forall e, E e -> Formula.tautology (κ e);
-
-    (* C5 *)
-    cand_termination : Formula.tautology term;
-
-    (* C6 *)
-    cand_rf_dep : rf ⊆ dep;
-
-    (* C7a *)
-    (* TODO: This part of the semantics is unresolved *)
-    cand_rf_sync : (sync ⨾ rf ⨾ sync) ∩ (λ ⋄ strongly_matches) ⊆ sync;
-
-    (* C7b *)
-    (* TODO: This part of the semantics is unresolved *)
-    cand_sync_strongly_fences : (λ ⋄ strongly_fences) ⊆ clos_sym sync;
-
-    (* C8a *)
-    cand_rf_perloc : rf ⊆ perloc;
-
-    (* C8b  *)
-    cand_rf_weak_perloc :
-      let weak_perloc :=
-          ((⊤₂ \ perloc⁻¹) ∩ ((⊤₂ \ λ ⋄ strongly_overlaps) ∪ perloc))^?
-      in
-      ((λ ⋄ blocks) \ weak_perloc) ⨾ rf⁻¹ ⊆ weak_perloc;
-
-    (* TODO: what happened to this condition? *)
-    (* JR: removed because rf ∩ (λ ⋄ strongly_fences) now empty by definition *)
-    (* cand_rfFences : rf ∩ (λ ⋄ strongly_fences) ⊆ sync^⋈; *)
-
-  }.
-
 End Pomset.
 
 Definition init_pomset : pomset :=

@@ -20,6 +20,11 @@ Set Implicit Arguments.
 Open Scope formula_scope.
 Open Scope list_additional_scope.
 
+(* This is an auxiliary lemma, used in seq_assoc.
+   While seq_assoc proves equivalence of two sets,
+   seq_assoc1 and seq_assoc2 show one-way inclusion.
+   It shows that semantics of s1 ; (s2 ; s3) is a
+   subset of semantics of (s1 ; s2) ; s3 *)
 Lemma seq_assoc2 (α : thread_id) s1 s2 s3 :
   Semantics α (Stmt.seq s1 (Stmt.seq s2 s3)) ⊆₁
   Semantics α (Stmt.seq (Stmt.seq s1 s2) s3).
@@ -476,6 +481,11 @@ Proof.
 Qed.
 
 
+(* This is an auxiliary lemma, used in seq_assoc.
+   While seq_assoc proves equivalence of two sets,
+   seq_assoc1 and seq_assoc2 show one-way inclusion.
+   It shows that semantics of (s1 ; s2) ; s3 is a
+   subset of semantics of s1 ; (s2 ; s3) *)
 Lemma seq_assoc1 (α : thread_id) s1 s2 s3 :
   Semantics α (Stmt.seq (Stmt.seq s1 s2) s3) ⊆₁
   Semantics α (Stmt.seq s1 (Stmt.seq s2 s3)).
@@ -1003,6 +1013,10 @@ Proof.
 Qed.
 
 
+(* This lemma corresponds to Lemma 4.5 (b).
+   It shows associativity of sequential composition.
+   In other words, it proves that semantics of s1 ; (s2 ; s3) and
+   (s1 ; s2) ; s3 are equal as sets of pomsets. *)
 Lemma seq_assoc (α : thread_id) s1 s2 s3 :
   Semantics α (Stmt.seq s1 (Stmt.seq s2 s3)) ≡₁
   Semantics α (Stmt.seq (Stmt.seq s1 s2) s3).

@@ -249,7 +249,7 @@ Record LETT (r : Reg.t) (m : Expr.t) :=
 
 Definition zero_or_one_event := E × E ⊆ eq.
 
-Record FENCE (α : thread_id) (σ : scope) (μ : mode) :=
+Record FENCE (α : thread_id) (μ : mode) :=
   {
     (* F1 *)
     fence_events : zero_or_one_event;
@@ -257,7 +257,7 @@ Record FENCE (α : thread_id) (σ : scope) (μ : mode) :=
     (* F2 *)
     fence_λ      : λ = fun e =>
                        ifP E e
-                       then {| imm_lbl:=Afence μ; α:=α; σ:=σ |}
+                       then {| imm_lbl:=Afence μ; α:=α; |}
                        else def_action;
 
     (* F3 *)
@@ -303,7 +303,7 @@ Definition read_τ_def r x v ϕ D ψ s :=
   (Formula.conj_list (map (fun e => ¬ (ϕ e)) E_list) ⇒
    Formula.subst_reg ψ r (Expr.reg s)).
 
-Record READ (α : thread_id) (σ : scope) (r : Reg.t)
+Record READ (α : thread_id) (r : Reg.t)
        (μ : mode) (x : location)
        (v : Events.Event.t -> Events.value)
        (ϕ : Events.Event.t -> Formula.t) :=
@@ -317,7 +317,7 @@ Record READ (α : thread_id) (σ : scope) (r : Reg.t)
   (* R2 *)
   read_λ      : λ = fun e =>
                       ifP E e
-                      then {| imm_lbl:=Aload false μ x (v e); α:=α; σ:=σ |}
+                      then {| imm_lbl:=Aload false μ x (v e); α:=α; |}
                       else def_action;
 
   (* R3 *)
@@ -345,7 +345,7 @@ Record READ (α : thread_id) (σ : scope) (r : Reg.t)
 Definition write_κ_def m v e :=
   ifP E e then Formula.eqEE m (Expr.val (v e)) else Formula.tt.
 
-Record WRITE (α : thread_id) (σ : scope) (x : location)
+Record WRITE (α : thread_id) (x : location)
        (m : Expr.t) (μ : mode) (v : Events.Event.t -> Events.value) := {
   (* W1 *)
   (* if κ (d) ∧ κ (e) is satisfiable then d = e, *)
@@ -356,7 +356,7 @@ Record WRITE (α : thread_id) (σ : scope) (x : location)
   (* W2 *)
   write_λ      : λ = fun e =>
                        ifP E e
-                       then {| imm_lbl:=Astore Xpln μ x (v e); α:=α; σ:=σ |}
+                       then {| imm_lbl:=Astore Xpln μ x (v e); α:=α; |}
                        else def_action;
 
   (* W3 *)
@@ -400,17 +400,17 @@ Inductive Semantics (α : thread_id) (s : Stmt.t) (P : pomset) : Prop :=
                 (stmt_eq : s = Stmt.assign r m)
                 (PE : LETT P r m)
 
-| interp_read r x μ σ v ϕ
-              (stmt_eq : s = Stmt.read r x μ σ)
-              (PE : READ P α σ r μ x v ϕ)
+| interp_read r x μ v ϕ
+              (stmt_eq : s = Stmt.read r x μ)
+              (PE : READ P α r μ x v ϕ)
 
-| interp_write x μ m σ v
-              (stmt_eq : s = Stmt.write x μ σ m)
-              (PE : WRITE P α σ x m μ v)
+| interp_write x μ m v
+              (stmt_eq : s = Stmt.write x μ m)
+              (PE : WRITE P α x m μ v)
 
-| interp_fence μ σ
-              (stmt_eq : s = Stmt.fence μ σ)
-              (PE : FENCE P α σ μ)
+| interp_fence μ
+              (stmt_eq : s = Stmt.fence μ)
+              (PE : FENCE P α μ)
 
 (* | interp_par γ s1 s2 p1 p2 P1 P2 *)
 (*                 (stmt_eq : s = par_st s1 s2 γ) *)
@@ -441,15 +441,15 @@ Ltac pomset_big_simplifier :=
   | PE : LETT _ _ _ |- _ =>
     rewrite ?(let_perloc PE), ?(let_dep PE), ?(let_rmw PE), ?(let_sync PE), ?(let_rf PE),
             ?(let_κ PE), ?(let_λ PE)
-  | PE : READ _ _ _ _ _ _ _ _ |- _ =>
+  | PE : READ _ _ _ _ _ _ _ |- _ =>
     rewrite ?(read_perloc PE), ?(read_dep PE), ?(read_rmw PE), ?(read_sync PE), ?(read_rf PE),
             ?(read_κ PE), ?(read_λ PE); unfold read_κ_def
-  | PE : WRITE _ _ _ _ _ _ _ |- _ =>
+  | PE : WRITE _ _ _ _ _ _ |- _ =>
     rewrite ?(write_perloc PE), ?(write_dep PE), ?(write_rmw PE), ?(write_sync PE),
             ?(write_rf PE),
             ?(write_κ PE),
             ?(write_λ PE); unfold write_κ_def
-  | PE : FENCE _ _ _ _ |- _ =>
+  | PE : FENCE _ _ _ |- _ =>
     rewrite ?(fence_perloc PE), ?(fence_dep PE), ?(fence_rmw PE), ?(fence_sync PE),
             ?(fence_rf PE),
             ?(fence_κ PE),
@@ -460,9 +460,9 @@ Ltac pomset_pt_simplifier :=
   match goal with
   | PE : SKIP _              |- _ => rewrite ?(skip_pt PE) in *
   | PE : LETT _ _ _          |- _ => rewrite ?(let_pt PE) in *
-  | PE : WRITE _ _ _ _ _ _ _ |- _ => rewrite ?(write_pt PE) in *
-  | PE : READ  _ _ _ _ _ _ _ _ |- _ => erewrite ?(read_pt PE) in *
-  | PE : FENCE _ _ _ _       |- _ => rewrite ?(fence_pt PE) in *
+  | PE : WRITE _ _ _ _ _ _   |- _ => rewrite ?(write_pt PE) in *
+  | PE : READ  _ _ _ _ _ _ _ |- _ => erewrite ?(read_pt PE) in *
+  | PE : FENCE _ _ _         |- _ => rewrite ?(fence_pt PE) in *
   end.
 
 Lemma semantics_wf (α : thread_id) (s : Stmt.t) (P : pomset) (SP : Semantics α s P)
@@ -895,12 +895,12 @@ Proof.
 Qed.
 
 Add Morphism READ with signature
-  pomset_equiv ==> eq ==> eq ==> eq ==> eq ==> eq ==> eq ==> eq ==> iff as read_more.
+  pomset_equiv ==> eq ==> eq ==> eq ==> eq ==> eq ==> eq ==> iff as read_more.
 Proof.
-  enough (forall x y t s r m l v ph,
-             pomset_equiv y x -> READ x t s r m l v ph -> READ y t s r m l v ph) as AA.
+  enough (forall x y t r m l v ph,
+             pomset_equiv y x -> READ x t r m l v ph -> READ y t r m l v ph) as AA.
   { ins; desf. now split; apply AA; auto. }
-  intros x y t s r m l v ph EQ HH; inv HH.
+  intros x y t r m l v ph EQ HH; inv HH.
   constructor; ins.
   all: try by pomset_equiv_rewrite; try apply HH.
   { apply HH; auto.
@@ -950,12 +950,12 @@ Proof.
 Qed.
 
 Add Morphism WRITE with signature
-  pomset_equiv ==> eq ==> eq ==> eq ==> eq ==> eq ==> eq ==> iff as write_more.
+  pomset_equiv ==> eq ==> eq ==> eq ==> eq ==> eq ==> iff as write_more.
 Proof.
-  enough (forall x y t s r m l v,
-             pomset_equiv y x -> WRITE x t s r m l v -> WRITE y t s r m l v) as AA.
+  enough (forall x y t r m l v,
+             pomset_equiv y x -> WRITE x t r m l v -> WRITE y t r m l v) as AA.
   { ins; desf. now split; apply AA. }
-  intros x y t s r m l v EQ HH; inv HH.
+  intros x y t r m l v EQ HH; inv HH.
 
   assert (Formula.disj_list (map (κ x) (events x)) ⇔
           Formula.disj_list (map (κ y) (events y))) as XX.
@@ -990,12 +990,12 @@ Proof.
 Qed.
 
 Add Morphism FENCE with signature
-  pomset_equiv ==> eq ==> eq ==> eq ==> iff as fence_more.
+  pomset_equiv ==> eq ==> eq ==> iff as fence_more.
 Proof.
-  enough (forall x y t s r,
-             pomset_equiv y x -> FENCE x t s r -> FENCE y t s r) as AA.
+  enough (forall x y t r,
+             pomset_equiv y x -> FENCE x t r -> FENCE y t r) as AA.
   { ins; desf. now split; apply AA. }
-  intros x y t s r EQ HH; inv HH.
+  intros x y t r EQ HH; inv HH.
   constructor; ins.
   all: try by pomset_equiv_rewrite; try apply HH.
   { by rewrite EQ. }

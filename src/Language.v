@@ -8,11 +8,6 @@ Require Import Basics.
 Require Import Events.
 Require Import AuxDef.
 
-Inductive scope :=
-| grp
-| proc
-| sys.
-
 Module Expr.
 
 Inductive t :=
@@ -322,9 +317,9 @@ Module Stmt.
 Inductive t :=
 | skip
 | assign (r : Reg.t) (m : Expr.t)
-| read (r : Reg.t) (L : location) (μ : mode) (σ : scope)
-| write (L : location) (μ : mode) (σ : scope) (m : Expr.t)
-| fence (ν : mode) (σ : scope)
+| read (r : Reg.t) (L : location) (μ : mode)
+| write (L : location) (μ : mode) (m : Expr.t)
+| fence (ν : mode)
 | ite (m : Expr.t) (s1 s2 : t)
 | seq (s1 s2 : t)
 (* | par (s1 s2 : statement) (γ : thread). *)
@@ -333,8 +328,8 @@ Inductive t :=
 Fixpoint used_regs (s : t) : list Reg.t :=
   match s with
   | assign r m     => r :: (Expr.used_regs m)
-  | read   r _ _ _ => [r]
-  | write  _ _ _ m => Expr.used_regs m
+  | read   r _ _ => [r]
+  | write  _ _ m => Expr.used_regs m
   | ite    m s1 s2 => (Expr.used_regs m) ++ used_regs s1 ++ used_regs s2
   | seq      s1 s2 => used_regs s1 ++ used_regs s2
   | _ => nil
@@ -342,8 +337,8 @@ Fixpoint used_regs (s : t) : list Reg.t :=
 
 Fixpoint used_locs (s : t) : list location :=
   match s with
-  | read   _ l _ _ => [l]
-  | write  l _ _ m => [l]
+  | read   _ l _ => [l]
+  | write  l _ m => [l]
   | ite    m s1 s2 => used_locs s1 ++ used_locs s2
   | seq      s1 s2 => used_locs s1 ++ used_locs s2
   | _ => nil
@@ -352,7 +347,7 @@ Fixpoint used_locs (s : t) : list location :=
 Fixpoint no_eregs (s : t) : Prop :=
   match s with
   | assign r m     => Expr.no_eregs m 
-  | write  _ _ _ m => Expr.no_eregs m
+  | write  _ _ m => Expr.no_eregs m
   | ite    m s1 s2 => Expr.no_eregs m /\ no_eregs s1 /\ no_eregs s2
   | seq      s1 s2 => no_eregs s1 /\ no_eregs s2
   | _ => True

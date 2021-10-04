@@ -322,7 +322,7 @@ Inductive t :=
 | fence (ν : mode)
 | ite (m : Expr.t) (s1 s2 : t)
 | seq (s1 s2 : t)
-(* | par (s1 s2 : statement) (γ : thread). *)
+| par (s1 s2 : t)
 .
 
 Fixpoint used_regs (s : t) : list Reg.t :=
@@ -332,6 +332,7 @@ Fixpoint used_regs (s : t) : list Reg.t :=
   | write  _ _ m => Expr.used_regs m
   | ite    m s1 s2 => (Expr.used_regs m) ++ used_regs s1 ++ used_regs s2
   | seq      s1 s2 => used_regs s1 ++ used_regs s2
+  | par      s1 s2 => used_regs s1 ++ used_regs s2
   | _ => nil
   end.
 
@@ -341,6 +342,7 @@ Fixpoint used_locs (s : t) : list location :=
   | write  l _ m => [l]
   | ite    m s1 s2 => used_locs s1 ++ used_locs s2
   | seq      s1 s2 => used_locs s1 ++ used_locs s2
+  | par      s1 s2 => used_locs s1 ++ used_locs s2
   | _ => nil
   end.
 
@@ -350,6 +352,7 @@ Fixpoint no_eregs (s : t) : Prop :=
   | write  _ _ m => Expr.no_eregs m
   | ite    m s1 s2 => Expr.no_eregs m /\ no_eregs s1 /\ no_eregs s2
   | seq      s1 s2 => no_eregs s1 /\ no_eregs s2
+  | par      s1 s2 => no_eregs s1 /\ no_eregs s2
   | _ => True
   end.
 End Stmt.

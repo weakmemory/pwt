@@ -48,14 +48,6 @@ Let dep1 := dep P1.
 Let dep2 := dep P2.
 Let dep := dep P.
 
-Let sync1 := sync P1.
-Let sync2 := sync P2.
-Let sync := sync P.
-
-Let perloc1 := perloc P1.
-Let perloc2 := perloc P2.
-Let perloc := perloc P.
-
 Let rf1 := rf P1.
 Let rf2 := rf P2.
 Let rf := rf P.
@@ -72,10 +64,6 @@ Record pomset_union :=
   { events_union    : E ≡₁ E1 ∪₁ E2;
     dep_restr1      : restr_rel E1 dep    ≡ dep1;
     dep_restr2      : restr_rel E2 dep    ≡ dep2;
-    sync_restr1     : restr_rel E1 sync   ≡ sync1;
-    sync_restr2     : restr_rel E2 sync   ≡ sync2;
-    perloc_restr1   : restr_rel E1 perloc ≡ perloc1;
-    perloc_restr2   : restr_rel E2 perloc ≡ perloc2;
     rf_restr1       : restr_rel E1 rf     ≡ rf1;
     rf_restr2       : restr_rel E2 rf     ≡ rf2;
     rmw_union       : rmw                 ≡ rmw1 ∪ rmw2;
@@ -84,18 +72,6 @@ Record pomset_union :=
 Lemma dep_union (PU : pomset_union) : dep1 ∪ dep2 ⊆ dep.
 Proof using.
   rewrite <- dep_restr1, <- dep_restr2; auto.
-  basic_solver.
-Qed.
-
-Lemma sync_union (PU : pomset_union) : sync1 ∪ sync2 ⊆ sync.
-Proof using.
-  rewrite <- sync_restr1, <- sync_restr2; auto.
-  basic_solver.
-Qed.
-
-Lemma perloc_union (PU : pomset_union) : perloc1 ∪ perloc2 ⊆ perloc.
-Proof using.
-  rewrite <- perloc_restr1, <- perloc_restr2; auto.
   basic_solver.
 Qed.
 
@@ -112,8 +88,6 @@ Record SKIP :=
     skip_pt     : forall D ψ, τ D ψ ⇔ ψ;
     skip_term   : term   ⇔ Formula.tt;
     skip_dep    : dep    ≡ ∅₂;
-    skip_perloc : perloc ≡ ∅₂;
-    skip_sync   : sync   ≡ ∅₂;
     skip_rmw    : rmw    ≡ ∅₂;
     skip_rf     : rf     ≡ ∅₂;
     skip_κ      : forall e, κ e ⇔ Formula.tt;
@@ -188,16 +162,6 @@ Record SEQ :=
     (* S5 *)
     seq_term : term ⇔ term1 ∧ τ1 E1 term2;
 
-    (* S7a *)
-    seq_sync_delay : forall d e (E1D : E1 d) (E2D : E2 e)
-                            (SYNC : sync_delays (λ1 d) (λ2 e)),
-        (sync)^? d e;
-
-    (* S8a *)
-    seq_coh_delay : forall d e (E1D : E1 d) (E2D : E2 e)
-                           (COH : coh_delays (λ1 d) (λ2 e)),
-        (perloc)^? d e;
-
     seq_wf  : wf P;
     seq_wf1 : wf P1;
   }.
@@ -238,8 +202,6 @@ Record LETT (r : Reg.t) (m : Expr.t) :=
     let_pt     : forall D ψ, τ D ψ ⇔ Formula.subst_reg ψ r m;
     let_term   : term     ⇔ Formula.tt;
     let_dep    : dep      ≡ ∅₂;
-    let_perloc : perloc   ≡ ∅₂;
-    let_sync   : sync     ≡ ∅₂;
     let_rmw    : rmw      ≡ ∅₂;
     let_rf     : rf       ≡ ∅₂;
     let_κ      : forall e, κ e ⇔ Formula.tt;
@@ -272,8 +234,6 @@ Record FENCE (α : thread_id) (μ : mode) :=
                         else Formula.tt;
 
     fence_dep    : dep    ≡ ∅₂;
-    fence_perloc : perloc ≡ ∅₂;
-    fence_sync   : sync   ≡ ∅₂;
     fence_rmw    : rmw    ≡ ∅₂;
     fence_rf     : rf     ≡ ∅₂;
   }.
@@ -334,8 +294,6 @@ Record READ (α : thread_id) (r : Reg.t)
                       else Formula.tt;
 
   read_dep    : dep    ≡ ∅₂;
-  read_perloc : perloc ≡ ∅₂;
-  read_sync   : sync   ≡ ∅₂;
   read_rmw    : rmw    ≡ ∅₂;
   read_rf     : rf     ≡ ∅₂;
 
@@ -376,8 +334,6 @@ Record WRITE (α : thread_id) (x : location)
   write_term : term ⇔ κE;
 
   write_dep    : dep    ≡ ∅₂;
-  write_perloc : perloc ≡ ∅₂;
-  write_sync   : sync   ≡ ∅₂;
   write_rmw    : rmw    ≡ ∅₂;
   write_rf     : rf     ≡ ∅₂;
 
@@ -436,21 +392,21 @@ Inductive Semantics (α : thread_id) (s : Stmt.t) (P : pomset) : Prop :=
 Ltac pomset_big_simplifier :=
   match goal with
   | PE : SKIP _ |- _ =>
-    rewrite ?(skip_perloc PE), ?(skip_dep PE), ?(skip_rmw PE), ?(skip_sync PE), ?(skip_rf PE),
+    rewrite ?(skip_dep PE), ?(skip_rmw PE), ?(skip_rf PE),
             ?(skip_κ PE), ?(skip_λ PE)
   | PE : LETT _ _ _ |- _ =>
-    rewrite ?(let_perloc PE), ?(let_dep PE), ?(let_rmw PE), ?(let_sync PE), ?(let_rf PE),
+    rewrite ?(let_dep PE), ?(let_rmw PE), ?(let_rf PE),
             ?(let_κ PE), ?(let_λ PE)
   | PE : READ _ _ _ _ _ _ _ |- _ =>
-    rewrite ?(read_perloc PE), ?(read_dep PE), ?(read_rmw PE), ?(read_sync PE), ?(read_rf PE),
+    rewrite ?(read_dep PE), ?(read_rmw PE), ?(read_rf PE),
             ?(read_κ PE), ?(read_λ PE); unfold read_κ_def
   | PE : WRITE _ _ _ _ _ _ |- _ =>
-    rewrite ?(write_perloc PE), ?(write_dep PE), ?(write_rmw PE), ?(write_sync PE),
+    rewrite ?(write_dep PE), ?(write_rmw PE),
             ?(write_rf PE),
             ?(write_κ PE),
             ?(write_λ PE); unfold write_κ_def
   | PE : FENCE _ _ _ |- _ =>
-    rewrite ?(fence_perloc PE), ?(fence_dep PE), ?(fence_rmw PE), ?(fence_sync PE),
+    rewrite ?(fence_dep PE), ?(fence_rmw PE),
             ?(fence_rf PE),
             ?(fence_κ PE),
             ?(fence_λ PE)
@@ -1118,25 +1074,13 @@ Proof.
   { rewrite (seq_pt HH).
     apply pt_more; [by apply WFY|].
     now pomset_equiv_rewrite. }
-  { rewrite (seq_term HH).
-    arewrite (τ y (events_set y) (term z) ⇔ τ y (events_set y') (term z')).
-    2: easy.
-    erewrite wf_pt_family_equiv; try apply WFY.
-    2: by symmetry; apply EQY.
-    apply pt_more; [by apply WFY|].
-    now pomset_equiv_rewrite. }
-  { enough ((sync x)^? d e) as [|AA]; subst; eauto.
-    { right. now apply EQX. }
-    apply EQY in E1D. apply EQZ in E2D.
-    rewrite (labels_equiv EQY) in SYNC.
-    rewrite (labels_equiv EQZ) in SYNC.
-    now apply HH. }
-  enough ((perloc x)^? d e) as [|AA]; subst; eauto.
-  { right. now apply EQX. }
-  apply EQY in E1D. apply EQZ in E2D.
-  rewrite (labels_equiv EQY) in COH.
-  rewrite (labels_equiv EQZ) in COH.
-  now apply HH.
+  rewrite (seq_term HH).
+  arewrite (τ y (events_set y) (term z) ⇔ τ y (events_set y') (term z')).
+  2: easy.
+  erewrite wf_pt_family_equiv; try apply WFY.
+  2: by symmetry; apply EQY.
+  apply pt_more; [by apply WFY|].
+  now pomset_equiv_rewrite.
 Qed.
 
 Add Morphism if_κ_def with signature

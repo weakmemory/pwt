@@ -38,15 +38,11 @@ Proof.
   set (P13lambda := SeqBuilder.tlambda P1 P3).
   set (P13dep := restr_rel (events_set P1 ∪₁ events_set P3) (dep P0)).
   set (P13 := SeqBuilder.t P1 P3 P13dep
-                           (restr_rel (events_set P1 ∪₁ events_set P3) (sync P0))
-                           (restr_rel (events_set P1 ∪₁ events_set P3) (perloc P0))
                            (restr_rel (events_set P1 ∪₁ events_set P3) (rf P0))).
 
   set (P23lambda := SeqBuilder.tlambda P2 P3).
   set (P23dep := restr_rel (events_set P2 ∪₁ events_set P3) (dep P0)).
   set (P23 := SeqBuilder.t P2 P3 P23dep
-                           (restr_rel (events_set P2 ∪₁ events_set P3) (sync P0))
-                           (restr_rel (events_set P2 ∪₁ events_set P3) (perloc P0))
                            (restr_rel (events_set P2 ∪₁ events_set P3) (rf P0))).
 
   assert (forall d (PD1 : events_set P1 d) (PD3 : events_set P3 d),
@@ -194,42 +190,6 @@ Proof.
     arewrite (rmw P3 ⊆ rmw P0) by (rewrite RMW0; eauto with hahn).
     basic_solver. }
 
-  assert (restr_rel (events_set P3) (sync P0) ≡ sync P3)
-    as SYNC_0_3.
-  { now erewrite <- sync_restr2 with (P2 := P3); [|apply PE]. }
-
-  assert (restr_rel (events_set P2) (sync P0) ≡ sync P2)
-    as SYNC_0_2.
-  { erewrite <- sync_restr2 with (P2 := P2); [|now apply PE0].
-    erewrite <- sync_restr1 with (P1 := P12); [|now apply PE].
-    rewrite restr_restr, EVENTS12.
-    basic_solver 10. }
-
-  assert (restr_rel (events_set P1) (sync P0) ≡ sync P1)
-    as SYNC_0_1.
-  { erewrite <- sync_restr1 with (P1 := P1); [|now apply PE0].
-    erewrite <- sync_restr1 with (P1 := P12); [|now apply PE].
-    rewrite restr_restr, EVENTS12.
-    basic_solver 10. }
-
-  assert (restr_rel (events_set P3) (perloc P0) ≡ perloc P3)
-    as PERLOC_0_3.
-  { now erewrite <- perloc_restr2 with (P2 := P3); [|apply PE]. }
-
-  assert (restr_rel (events_set P2) (perloc P0) ≡ perloc P2)
-    as PERLOC_0_2.
-  { erewrite <- perloc_restr2 with (P2 := P2); [|now apply PE0].
-    erewrite <- perloc_restr1 with (P1 := P12); [|now apply PE].
-    rewrite restr_restr, EVENTS12.
-    basic_solver 10. }
-
-  assert (restr_rel (events_set P1) (perloc P0) ≡ perloc P1)
-    as PERLOC_0_1.
-  { erewrite <- perloc_restr1 with (P1 := P1); [|now apply PE0].
-    erewrite <- perloc_restr1 with (P1 := P12); [|now apply PE].
-    rewrite restr_restr, EVENTS12.
-    basic_solver 10. }
-
   assert (forall r,
              restr_rel (events_set P1 ∪₁ events_set P3)
                        (P13lambda ⋄ r) ≡
@@ -283,6 +243,23 @@ Proof.
              restr_rel (events_set P2 ∪₁ events_set P3) (r ∩ (λ P0 ⋄ r'))) as P23λmapAlt.
   { ins. rewrite <- inter_restr_absorb_r. unfold P23lambda in *.
     rewrite P23λmap. basic_solver 10. }
+  assert (restr_rel (events_set P3) (dep P0) ≡ dep P3)
+    as DEP_0_3.
+  { now erewrite <- dep_restr2 with (P2 := P3); [|apply PE]. }
+
+  assert (restr_rel (events_set P2) (dep P0) ≡ dep P2)
+    as DEP_0_2.
+  { erewrite <- dep_restr2 with (P2 := P2); [|now apply PE0].
+    erewrite <- dep_restr1 with (P1 := P12); [|now apply PE].
+    rewrite restr_restr, EVENTS12.
+    basic_solver 10. }
+
+  assert (restr_rel (events_set P1) (dep P0) ≡ dep P1)
+    as DEP_0_1.
+  { erewrite <- dep_restr1 with (P1 := P1); [|now apply PE0].
+    erewrite <- dep_restr1 with (P1 := P12); [|now apply PE].
+    rewrite restr_restr, EVENTS12.
+    basic_solver 10. }
 
   assert (wf P13) as WF13.
   { edestruct SeqBuilder.partial_wf with (P1:=P1) (P2:=P3) (P12:=P13) as [AA BB];
@@ -294,9 +271,6 @@ Proof.
       [ apply irreflexive_restr, WF | apply transitive_restr, WF].
     all: unfold events_set; ins. 
     all: ins; rewrite ?lset_app, ?restr_rel2E; auto.
-    { rewrite <- inter_restr_absorb_l.
-      rewrite P13λmap. rewrite <- restr_inter.
-      apply restr_rel_mori; [easy|apply WF]. }
     { eapply functional_mori; [|by apply WF].
       rewrite RMW0. red. basic_solver. }
     { rewrite RMW13REST.
@@ -304,19 +278,14 @@ Proof.
       2: by apply inclusion_restr with (dom:=events_set P1 ∪₁ events_set P3).
       rewrite P13λmap.
       apply restr_rel_mori; [easy|apply WF]. }
-    { rewrite (wf_rmw_sync WF1), (wf_rmw_sync WF3).
-      rewrite <- SYNC_0_1, <- SYNC_0_3.
+    { rewrite (wf_rmw_dep WF1), (wf_rmw_dep WF3).
+      rewrite <- DEP_0_1, <- DEP_0_3.
       basic_solver. }
-    { rewrite (wf_rmw_perloc WF1), (wf_rmw_perloc WF3).
-      rewrite <- PERLOC_0_1, <- PERLOC_0_3.
-      basic_solver. }
-    1-3: rewrite RMW13REST, <- restr_transp, seq_restr, P13λmapAlt.
-    1-3: now rewrite <- restr_rel_cr; apply restr_rel_mori; [|apply WF].
-
-    all: rewrite <- inter_restr_absorb_l, P13λmap, <- restr_inter.
-    all: rewrite RMW13REST, <- restr_transp, seq_restr.
-    all: now rewrite <- restr_rel_cr; apply restr_rel_mori; [|apply WF]. }
-
+    { rewrite RMW13REST, <- restr_transp, seq_restr, P13λmapAlt.
+      now rewrite <- restr_rel_cr; apply restr_rel_mori; [|apply WF]. }
+    rewrite <- inter_restr_absorb_l, P13λmap, <- restr_inter.
+    rewrite RMW13REST, <- restr_transp, seq_restr.
+    now rewrite <- restr_rel_cr; apply restr_rel_mori; [|apply WF]. }
   assert (wf P23) as WF23.
   { edestruct SeqBuilder.partial_wf with (P1:=P2) (P2:=P3) (P12:=P23) as [AA BB];
       eauto; try easy.
@@ -327,9 +296,6 @@ Proof.
       [ apply irreflexive_restr, WF | apply transitive_restr, WF].
     all: unfold events_set; ins. 
     all: ins; rewrite ?lset_app, ?restr_rel2E; auto.
-    { rewrite <- inter_restr_absorb_l.
-      rewrite P23λmap. rewrite <- restr_inter.
-      apply restr_rel_mori; [easy|apply WF]. }
     { eapply functional_mori; [|by apply WF].
       rewrite RMW0. red. basic_solver. }
     { rewrite RMW23REST.
@@ -337,35 +303,17 @@ Proof.
       2: by apply inclusion_restr with (dom:=events_set P2 ∪₁ events_set P3).
       rewrite P23λmap.
       apply restr_rel_mori; [easy|apply WF]. }
-    { rewrite (wf_rmw_sync WF2), (wf_rmw_sync WF3).
-      rewrite <- SYNC_0_2, <- SYNC_0_3.
+    { rewrite (wf_rmw_dep WF2), (wf_rmw_dep WF3).
+      rewrite <- DEP_0_2, <- DEP_0_3.
       basic_solver. }
-    { rewrite (wf_rmw_perloc WF2), (wf_rmw_perloc WF3).
-      rewrite <- PERLOC_0_2, <- PERLOC_0_3.
-      basic_solver. }
-    1-3: rewrite RMW23REST, <- restr_transp, seq_restr, P23λmapAlt.
-    1-3: now rewrite <- restr_rel_cr; apply restr_rel_mori; [|apply WF].
-
-    all: rewrite <- inter_restr_absorb_l, P23λmap, <- restr_inter.
-    all: rewrite RMW23REST, <- restr_transp, seq_restr.
-    all: now rewrite <- restr_rel_cr; apply restr_rel_mori; [|apply WF]. }
+    { rewrite RMW23REST, <- restr_transp, seq_restr, P23λmapAlt.
+      now rewrite <- restr_rel_cr; apply restr_rel_mori; [|apply WF]. }
+    rewrite <- inter_restr_absorb_l, P23λmap, <- restr_inter.
+    rewrite RMW23REST, <- restr_transp, seq_restr.
+    now rewrite <- restr_rel_cr; apply restr_rel_mori; [|apply WF]. }
 
   assert (SEQ P13 P1 P3) as SEQ13.
   { subst P13 P13dep. constructor; auto; ins; try easy.
-    3: { enough ((perloc P0)^? d e) as AA.
-         { unfolder in AA. basic_solver 10. }
-         assert (events_set P12 d) as BB.
-         { apply EVENTS12. red; auto. }
-         apply PE; auto.
-         rewrite SAMELBL_12_0; auto.
-         rewrite SAMELBL_1_0 in COH; auto. }
-    2: { enough ((sync P0)^? d e) as AA.
-         { unfolder in AA. basic_solver 10. }
-         assert (events_set P12 d) as BB.
-         { apply EVENTS12. red; auto. }
-         apply PE; auto.
-         rewrite SAMELBL_12_0; auto.
-         rewrite SAMELBL_1_0 in SYNC; auto. }
     assert ((events_set P1 ∪₁ events_set P3) ∩₁ events_set P1 ≡₁ events_set P1) as AA1.
     { clear. basic_solver. }
     assert ((events_set P1 ∪₁ events_set P3) ∩₁ events_set P3 ≡₁ events_set P3) as AA2.
@@ -383,20 +331,6 @@ Proof.
 
   assert (SEQ P23 P2 P3) as SEQ23.
   { subst P23 P23dep. constructor; auto; ins; try easy.
-    3: { enough ((perloc P0)^? d e) as AA.
-         { unfolder in AA. basic_solver 10. }
-         assert (events_set P12 d) as BB.
-         { apply EVENTS12. red; auto. }
-         apply PE; auto.
-         rewrite SAMELBL_12_0; auto.
-         rewrite SAMELBL_2_0 in COH; auto. }
-    2: { enough ((sync P0)^? d e) as AA.
-         { unfolder in AA. basic_solver 10. }
-         assert (events_set P12 d) as BB.
-         { apply EVENTS12. red; auto. }
-         apply PE; auto.
-         rewrite SAMELBL_12_0; auto.
-         rewrite SAMELBL_2_0 in SYNC; auto. }
     assert ((events_set P2 ∪₁ events_set P3) ∩₁ events_set P2 ≡₁ events_set P2) as AA1.
     { clear. basic_solver. }
     assert ((events_set P2 ∪₁ events_set P3) ∩₁ events_set P3 ≡₁ events_set P3) as AA2.

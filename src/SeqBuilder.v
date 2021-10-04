@@ -27,7 +27,7 @@ Context
   (α : thread_id)
   (s1 s2 : Stmt.t)
   (P1 P2 : pomset)
-  (tdep tsync tperloc trf : relation Events.Event.t)
+  (tdep trf : relation Events.Event.t)
   (PE1 : Semantics α s1 P1)
   (PE2 : Semantics α s2 P2).
 
@@ -40,8 +40,6 @@ Definition tlambda :=
 Definition t := {|
   events := events P1 ++ events P2;
   dep    := tdep;
-  sync   := tsync;
-  perloc := tperloc;
   λ      := tlambda;
   κ      := seq_κ_def P1 P2 tlambda tdep;
   τ D ψ  := τ P1 D (τ P2 D ψ);

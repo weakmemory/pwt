@@ -39,14 +39,6 @@ Record pomset := {
   (* Dependency order ⊴ *)
   dep    : relation Event.t;
 
-  (* M7 *)
-  (* Synchronization order ≤ *)
-  sync   : relation Event.t;
-
-  (* M8 *)
-  (* Per-location order ⊑ *)
-  perloc : relation Event.t;
-
   rf     : relation Event.t;
 
   (* M9 *)
@@ -75,8 +67,6 @@ Record pomset_equiv :=
                              (τ P) e_set φ ⇔ (τ P') e_set φ;
   term_equiv    : term P ⇔ term P';
   dep_equiv     : dep    P ≡ dep    P';
-  sync_equiv    : sync   P ≡ sync   P';
-  perloc_equiv  : perloc P ≡ perloc P';
   rf_equiv      : rf  P    ≡ rf  P';
   rmw_equiv     : rmw P    ≡ rmw P';
   }.
@@ -90,7 +80,6 @@ Record pomset_superset :=
   (* TODO: should e_eset be used? *)
   sup_τ        : forall e_set φ, e_set ⊆₁ E' -> τ P' φ = τ P φ;
   sup_dep      : dep P' ⊆ dep P;
-  sup_perloc   : perloc P' ⊆ perloc P;
   sup_rf       : rf P' ⊆ rf P;
   sup_rmw      : rmw P' ⊆ rmw P;
   }.
@@ -127,10 +116,6 @@ Ltac pomset_equiv_rewrite :=
            rewrite (term_equiv EQ)
          | EQ : pomset_equiv _ _ |- _ =>
            rewrite (dep_equiv EQ)
-         | EQ : pomset_equiv _ _ |- _ =>
-           rewrite (perloc_equiv EQ)
-         | EQ : pomset_equiv _ _ |- _ =>
-           rewrite (sync_equiv EQ)
          | EQ : pomset_equiv _ _ |- _ =>
            rewrite (rmw_equiv EQ)
          | EQ : pomset_equiv _ _ |- _ =>
@@ -173,14 +158,10 @@ Notation "'κ'" := (κ P).
 Notation "'term'" := (term P).
 
 Notation "'dep'" := (dep P).
-Notation "'sync'" := (sync P).
-Notation "'perloc'" := (perloc P).
 Notation "'rf'" := (rf P).
 Notation "'rmw'" := (rmw P).
 
 Notation "e1 ⊴ e2" := (dep e1 e2) (at level 14).
-Notation "e1 ≤ e2" := (sync e1 e2) (at level 14).
-Notation "e1 ⊑ e2" := (perloc e1 e2) (at level 14).
 
 Notation "'R'" := (fun a => is_r' (λ a)).
 Notation "'W'" := (fun a => is_w' (λ a)).
@@ -305,37 +286,23 @@ Record wf :=
     (* M6 *)
     wf_dep_pord    : strict_partial_order dep;
     wf_depE        : dep ≡ ⦗E⦘ ⨾ dep ⨾ ⦗E⦘;
-    (* M7 *)
-    wf_sync_pord   : strict_partial_order sync;
-    wf_syncE       : sync ≡ ⦗E⦘ ⨾ sync ⨾ ⦗E⦘;
-    (* M8 *)
-    wf_perloc_pord : strict_partial_order perloc;
-    wf_perlocE     : perloc ≡ ⦗E⦘ ⨾ perloc ⨾ ⦗E⦘;
-
-    (* M8a *)
-    wf_syncPerloc : (λ ⋄ overlaps) ∩ sync ⊆ perloc;
 
 
-    (* M9 *)
+    (* M10 *)
     wf_rmw_functional : functional rmw;
 
-    (* M9a *)
+    (* M10a *)
     wf_rmw_blocks : rmw ⊆ (λ ⋄ blocks);
 
-    (* M9b *)
-    wf_rmw_sync : rmw ⊆ sync;
-    wf_rmw_perloc : rmw ⊆ perloc;
+    (* M10b *)
+    wf_rmw_dep : rmw ⊆ dep;
 
-    (* M9C (i) *)
+    (* M10C (i) *)
     wf_rmw_atom_dep_w    : (dep    ⨾ rmw⁻¹) ∩ (λ ⋄ overlaps) ⊆ dep^?;
-    wf_rmw_atom_sync_w   : (sync   ⨾ rmw⁻¹) ∩ (λ ⋄ overlaps) ⊆ sync^?;
-    wf_rmw_atom_perloc_w : (perloc ⨾ rmw⁻¹) ∩ (λ ⋄ overlaps) ⊆ perloc^?;
 
-    (* M9C (ii) *)
+    (* M10C (ii) *)
     wf_rmw_atom_dep_r    : rmw⁻¹ ⨾ (λ ⋄ overlaps) ∩ dep     ⊆ dep^?;
-    wf_rmw_atom_sync_r   : rmw⁻¹ ⨾ (λ ⋄ overlaps) ∩ sync    ⊆ sync^?;
-    wf_rmw_atom_perloc_r : rmw⁻¹ ⨾ (λ ⋄ overlaps) ∩ perloc  ⊆ perloc^?;
-                                 
+
     wf_ninEλ : forall e (NIN : ~ E e), λ e = def_action;
     wf_ninEκ : forall e (NIN : ~ E e), κ e ⇔ Formula.tt;
     wf_rfE_  : rf ≡ ⦗E⦘ ⨾ rf ⨾ ⦗E⦘;
@@ -344,7 +311,7 @@ Record wf :=
 Lemma wf_rmwE_ (WF : wf) : rmw ≡ ⦗E⦘ ⨾ rmw ⨾ ⦗E⦘.
 Proof using.
   apply dom_helper_3.
-  rewrite wf_rmw_perloc, wf_perlocE; auto.
+  rewrite wf_rmw_dep, wf_depE; auto.
   basic_solver.
 Qed.
 
@@ -387,6 +354,27 @@ Proof.
   red. by constructor.
 Qed.
 
+Record cand :=
+  { cand_wf : wf;
+
+    cand_rf_injective : functional rf⁻¹;
+
+    (* C2a *)
+    cand_rf_matches : rf ⊆ λ ⋄ matches;
+
+    (* C2b *)
+    cand_rf_total : codom_rel rf ≡₁ R ∩₁ E;
+
+    (* C3 *)
+    cand_precondition : forall e, E e -> Formula.tautology (κ e);
+
+    (* C5 *)
+    cand_termination : Formula.tautology term;
+
+    (* C6 *)
+    cand_rf_dep : rf ⊆ dep;
+  }.
+
 End Pomset.
 
 Definition init_pomset : pomset :=
@@ -396,8 +384,6 @@ Definition init_pomset : pomset :=
      τ := fun _ φ => φ;
      term   := Formula.tt;
      dep    := ∅₂;
-     sync   := ∅₂;
-     perloc := ∅₂;
      rf     := ∅₂;
      rmw    := ∅₂;
   |}.
@@ -421,8 +407,6 @@ Definition local_initialized_pomset (regs : list Reg.t) : pomset :=
                         (fun ψ r => Formula.subst_reg ψ r (Expr.val 0)) regs φ;
       term   := Formula.ff;
       dep    := ∅₂;
-      sync   := ∅₂;
-      perloc := ∅₂;
       rf     := ∅₂;
       rmw    := ∅₂;
   |}.

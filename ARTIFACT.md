@@ -26,27 +26,20 @@ There is a CoqIDE shortcut on the desktop, which could be used to explore the de
 We propose now that after everything is set up, you take a look at the main lemmas listed below.
 
 ### Using your own Coq setup with opam
+All required dependencies can be installed via package manager [`opam` (version >= 2.0)](https://opam.ocaml.org/)
+by running `./configure` from the project.
+It installs:
+- [Coq 8.13](https://coq.inria.fr)
+- [Hahn library](https://github.com/vafeiadis/hahn) (`coq-hahn`)
+- [Intermediate Memory Model](https://github.com/weakmemory/imm) (`coq-imm.1.4`)
+The installation of `coq-imm.1.4` may take a lot of time (> 20 min).
+
+After that, you may build the project by running `make -j4` inside of the project folder.
+Now, we propose you take a look at the main lemmas listed below.
+
+### Main Lemmas
 
 TODO
-
-## Building the Project
-
-### Requirements
-* [Coq 8.13.1](https://coq.inria.fr)
-* [Hahn library](https://github.com/vafeiadis/hahn) (`coq-hahn`)
-* [Intermediate Memory Model](https://github.com/weakmemory/imm) (`coq-imm.1.4`)
-
-All required dependencies can be installed via package manager [`opam`](https://opam.ocaml.org/). 
-
-```bash
-opam repo add coq-released https://coq.inria.fr/opam/released
-opam remote add coq-weakmemory-local -k git https://github.com/weakmemory/local-coq-opam-archive
-opam install coq-hahn coq-imm.1.4
-```
-
-### Building Manually
-
-To build the project just use `make -j` command (assuming all dependencies were installed as described above). 
 
 ## Description of the project's files
 

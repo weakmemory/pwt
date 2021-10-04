@@ -1,7 +1,7 @@
 # Pomsets w/ Transformers (a Coq formalization)
 
 This repository contains Coq code supplementing the paper _Leaky Semicolon: Compositional Semantic Dependencies for Relaxed-Memory Concurrency_ by 
-Alan Jeffrey, James Riely, Mark Batty, Simon Cooksey, Anton Podkopaev, and Ilya Kaysin.
+Alan Jeffrey, James Riely, Mark Batty, Simon Cooksey, Ilya Kaysin, and Anton Podkopaev.
 
 ## Building the Project
 

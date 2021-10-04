@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider :virtualbox do |v|
     v.gui = true
-    v.memory = 8192
+    v.memory = 4096
     # see https://github.com/joelhandwell/ubuntu_vagrant_boxes/issues/1
     # for the problem discussion and other possible solutions
     v.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
@@ -54,9 +54,10 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, privileged: false, inline: "if [ ! -d ~/artifact_compiled ]; then cp -r ~/artifact ~/artifact_compiled; fi"
   config.vm.provision :shell, inline: "sudo apt install -y mupdf"
   # in case of errors here it's simpler to ignore them
-  # config.vm.provision :shell, privileged: false, inline: "ln -sf ~/artifact/paper.pdf ~/Desktop/paper.pdf || true"
-  config.vm.provision :shell, privileged: false, inline: "ln -sf ~/artifact/README.md ~/Desktop/README.md || true"
-  config.vm.provision :shell, privileged: false, inline: "ln -sf ~/artifact/src ~/Desktop/src || true"
+  config.vm.provision :shell, privileged: false, inline: "mkdir -p ~/Desktop/"
+  # config.vm.provision :shell, privileged: false, inline: "ln -sf ~/artifact/paper.pdf ~/Desktop/paper.pdf"
+  config.vm.provision :shell, privileged: false, inline: "ln -sf ~/artifact/README.md ~/Desktop/README.md"
+  config.vm.provision :shell, privileged: false, inline: "ln -sf ~/artifact/src ~/Desktop/src"
 
   # install and configure Proof General
   config.vm.provision :shell, inline: "sudo apt install -y ttf-ancient-fonts"
@@ -72,6 +73,8 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, inline: "sudo apt install -y libgtksourceview-3.0-dev"  
   config.vm.provision :shell, inline: "sudo apt install -y pkg-config"
   config.vm.provision :shell, privileged: false, inline: "opam install -y --assume-depexts coqide"
+  config.vm.provision :shell, privileged: false, inline: "cp ~/artifact/vagrant/coqide.desktop ~/Desktop/"
+  config.vm.provision :shell, inline: "sudo chmod +x /home/vagrant/Desktop/coqide.desktop"
 
   # make project
   config.vm.provision :shell, privileged: false, inline: "cd ~/artifact_compiled; make -j 4"

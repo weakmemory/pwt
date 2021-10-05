@@ -39,7 +39,12 @@ Now, we propose you take a look at the main lemmas listed below.
 
 ### Main Lemmas
 
-TODO
+The table below contains main lemmas proven about Pomsets w/ Transformers.
+| Paper            | Coq                                                               | Description                                              |
+| ---              | --                                                                | --                                                       |
+| §4.3, Lemma 4.5a | `SeqSkipId.v`, lemmas  `skip_seq_id_left` and `skip_seq_id_right` | `skip` as an identity element for the semicolon operator |
+| §4.3, Lemma 4.5b | `SeqAssoc.v`, lemma `seq_assoc`                                   | associativity of the semicolon operator                  |
+| §4.3, Lemma 4.6e | `IfClosure.v`, lemma `if_closure`                                 | distribution of the if operator over semicolon           |
 
 ## Description of the project's files
 

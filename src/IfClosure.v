@@ -440,3 +440,5 @@ Proof.
   all: apply disj_more; try apply conj_more; try easy;
     try easy; try (apply TP4; auto).
 Qed.
+
+Redirect "if_closure.axioms" Print Assumptions if_closure.

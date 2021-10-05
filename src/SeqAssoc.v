@@ -858,3 +858,5 @@ Lemma seq_assoc (α : thread_id) s1 s2 s3 :
   Semantics α (Stmt.seq s1 (Stmt.seq s2 s3)) ≡₁
   Semantics α (Stmt.seq (Stmt.seq s1 s2) s3).
 Proof using. split; [apply seq_assoc2|apply seq_assoc1]. Qed.
+
+Redirect "seq_assoc.axioms" Print Assumptions seq_assoc.

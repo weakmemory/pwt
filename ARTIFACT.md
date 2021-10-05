@@ -38,13 +38,20 @@ After that, you may build the project by running `make -j4` inside of the projec
 Now, we propose you take a look at the main lemmas listed below.
 
 ### Main Lemmas
-
 The table below contains main lemmas proven about Pomsets w/ Transformers.
-| Paper            | Coq                                                               | Description                                              |
-| ---              | --                                                                | --                                                       |
-| §4.3, Lemma 4.5a | `SeqSkipId.v`, lemmas  `skip_seq_id_left` and `skip_seq_id_right` | `skip` as an identity element for the semicolon operator |
-| §4.3, Lemma 4.5b | `SeqAssoc.v`, lemma `seq_assoc`                                   | associativity of the semicolon operator                  |
-| §4.3, Lemma 4.6e | `IfClosure.v`, lemma `if_closure`                                 | distribution of the if operator over semicolon           |
+| Paper            | Coq                                                                      | Description                                              |
+|                  |                                                                          |                                                          |
+| ---              | --                                                                       | --                                                       |
+| §4.3, Lemma 4.5a | `SeqSkipId.v`, lemmas  <br /> `skip_seq_id_left` and `skip_seq_id_right` | `skip` as an identity element for the semicolon operator |
+| §4.3, Lemma 4.5b | `SeqAssoc.v`, lemma `seq_assoc`                                          | associativity of the semicolon operator                  |
+| §4.3, Lemma 4.6e | `IfClosure.v`, lemma `if_closure`                                        | distribution of the if operator over semicolon           |
+
+Our proofs of the lemmas use the following axioms (and no other assumptions):
+- Excluded middle, XM (`classic` from `Coq.Logic.Classical_Prop`);
+- (Dependent) Functional Extensionality, (D)FE (`functional_extensionality_dep` from `Coq.Logic.FunctionalExtensionality`);
+- Constructive Definite Description, CDD (`constructive_definite_description` from `Coq.Logic.Description`).
+You may check that by taking a look at `skip_seq_id_left.axioms.out`, `skip_seq_id_right.axioms.out`, `seq_assoc.axioms.out` and `if_closure.axioms.out`.
+They are generated during the project compilation by `Print Assumptions` instructions at the end of `SeqSkipId.v`, `SeqAssoc.v`, and `IfClosure.v` files.
 
 ## Description of the project's files
 

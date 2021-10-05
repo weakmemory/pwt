@@ -167,3 +167,6 @@ Proof.
   rewrite (rmw_union (seq_pomset_union PE)).
   pomset_big_simplifier. basic_solver.
 Qed.
+
+Redirect "skip_seq_id_right.axioms" Print Assumptions skip_seq_id_right.
+Redirect "skip_seq_id_left.axioms"  Print Assumptions skip_seq_id_left.

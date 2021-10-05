@@ -14,7 +14,7 @@ Below, we provide guidance for both approaches.
 ### Using the Virtual Machine 
 You need to get a [VirtualBox](https://www.virtualbox.org/) (tested w/ version 6.1.26) on your system and import the VM
 `pwt.ova`. Please, note the following:
-- The VM should be provided with at least 4GB of RAM.
+- The VM should be provided with at least 8GB of RAM.
 - The VM is a Ubuntu 20.04 with `coq`, `coqide`, `vim` and `emacs` being set-up.
 - Username and password are both `vagrant`.
 

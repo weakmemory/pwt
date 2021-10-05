@@ -96,7 +96,7 @@ Record SKIP :=
 
 Record PAR :=
   {
-    (* P1 P6 P7 P8 P9 *)
+    (* P1 P6 P7 *)
     par_pomset_union : pomset_union;
 
     (* P1 *)
@@ -106,15 +106,16 @@ Record PAR :=
     par_label_union : label_union;
 
     (* P3 *)
-    par_precondition : forall e, (E1 e -> κ e ⇔ κ1 e) /\
-                            (E2 e -> κ e ⇔ κ2 e);
+    par_κ : forall e, κ e ⇔ ifP E1 e then κ1 e else κ2 e;
+
     (* P4 *)
-    par_pt : τ = τ1;
+    par_pt : forall D ψ, τ D ψ ⇔ τ2 D ψ;
 
     (* P5 *)
-    par_term : term = term1 ∧ term2;
+    par_term : term ⇔ term1 ∧ term2;
 
     par_wf : wf P;
+    par_wf1 : wf P1;
   }.
 
 Definition seq_κ_def l dep_rel (e : Event.t) :=
@@ -368,13 +369,11 @@ Inductive Semantics (α : thread_id) (s : Stmt.t) (P : pomset) : Prop :=
               (stmt_eq : s = Stmt.fence μ)
               (PE : FENCE P α μ)
 
-(* | interp_par γ s1 s2 p1 p2 P1 P2 *)
-(*                 (stmt_eq : s = par_st s1 s2 γ) *)
-(*                 (interp1 : Semantics γ s1 p1) *)
-(*                 (in_pomset1 : p1 P1) *)
-(*                 (interp2 : Semantics α s2 p2) *)
-(*                 (in_pomset2 : p2 P2) *)
-(*                 (PE : p ≡₁ fun P => PAR P P1 P2) *)
+| interp_par s1 s2 P1 P2
+                (stmt_eq : s = Stmt.par s1 s2)
+                (interp1 : Semantics α s1 P1)
+                (interp2 : Semantics α s2 P2)
+                (PE : PAR P P1 P2)
 
 | interp_seq s1 s2 P1 P2
             (stmt_eq : s = Stmt.seq s1 s2)
@@ -1083,6 +1082,31 @@ Proof.
   now pomset_equiv_rewrite.
 Qed.
 
+Add Morphism PAR with signature
+  pomset_equiv ==> pomset_equiv ==> pomset_equiv ==> iff as par_more.
+Proof.
+  enough (forall x x' y y' z z'
+                 (EQX : pomset_equiv x' x)
+                 (EQY : pomset_equiv y' y)
+                 (EQZ : pomset_equiv z' z)
+                 (HH: PAR x y z),
+             PAR x' y' z') as AA.
+  { ins; desf. now split; apply AA; auto. }
+  ins. inv HH.
+  assert (wf y) as WFY by apply HH.
+
+  constructor; ins.
+  all: pomset_equiv_rewrite.
+  all: try by rewrite EQX.
+  all: try by rewrite EQY.
+  1,2: by rewrite EQX, EQY, EQZ; apply HH.
+  { rewrite (par_κ HH).
+    desf; try basic_solver.
+    1,4: now eapply κ_equiv.
+    all: now exfalso; apply n, EQY. }
+  now rewrite (par_term HH).
+Qed.
+
 Add Morphism if_κ_def with signature
   pomset_equiv ==> pomset_equiv ==> eq ==> eq ==> Formula.equiv as if_κ_def_more.
 Proof.
@@ -1136,5 +1160,6 @@ Proof.
   induction sx; ins.
   1-5: by inv HH; econstructor; eauto; rewrite EQ; eauto.
   { inv HH. eapply interp_if with (P1:=P0); eauto. by rewrite EQ. }
-  inv HH. eapply interp_seq; eauto. by rewrite EQ.
+  { inv HH. eapply interp_seq; eauto. by rewrite EQ. }
+  inv HH. eapply interp_par; eauto. by rewrite EQ.
 Qed.

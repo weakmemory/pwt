@@ -39,6 +39,7 @@ Now, we propose you take a look at the main lemmas listed below.
 
 ### Main Lemmas
 The table below contains main lemmas proven about Pomsets w/ Transformers.
+
 | Paper            | Coq                                                                      | Description                                              |
 |                  |                                                                          |                                                          |
 | ---              | --                                                                       | --                                                       |

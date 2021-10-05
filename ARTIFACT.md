@@ -50,7 +50,7 @@ After the project is compiled, you may want to check how the main definitions an
 | §4.3, Lemma 4.5b                       | associativity of the semicolon operator                  | `SeqAssoc.v`        | lemma `seq_assoc`                                                  |
 | §4.3, Lemma 4.6e                       | distribution of the if operator over semicolon           | `IfClosure.v`       | lemma `if_closure`                                                 |
 
-Our proofs of the lemmas use the following axioms (and no other assumptions):
+Our proofs of the main lemmas use the following axioms (and no other assumptions):
 - Excluded middle, XM (`classic` from `Coq.Logic.Classical_Prop`);
 - (Dependent) Functional Extensionality, (D)FE (`functional_extensionality_dep` from `Coq.Logic.FunctionalExtensionality`);
 - Constructive Definite Description, CDD (`constructive_definite_description` from `Coq.Logic.Description`).

@@ -26,7 +26,7 @@ There is a CoqIDE shortcut on the desktop, which could be used to explore the de
 
 ### Using your own Coq setup with opam
 All required dependencies can be installed via package manager [`opam` (version >= 2.0)](https://opam.ocaml.org/)
-by running `./configure` from the root project folder.
+by running `./configure` from the project's root folder.
 It installs:
 - [Coq 8.13](https://coq.inria.fr)
 - [Hahn library](https://github.com/vafeiadis/hahn) (`coq-hahn`)
@@ -34,34 +34,36 @@ It installs:
 
 The compilation and installation of `coq-imm.1.4` may take a lot of time (> 40 min).
 
-After that, you may build the project by running `make -j4` from the root project folder.
+After that, you may build the project by running `make -j4` from the project's root folder.
 
 ## Checking the artifact's code
 After the project is compiled, you may want to check how the main definitions and results in Coq are related to the ones in the paper.
 
-| Paper                           | Description                                              | Coq                                                                            |
-| ---                             | ---                                                      | ---                                                                            |
-| §4.1                            | definitions of statements _S_ and expressions _M_        | `Language.v`, `Expr.t` and `Stmt.t`                                            |
-| §4.3, Def. 4.2                  | a definition of predicate transformers                   | `PredTransformer.v`, `Record predTransformer`                                  |
-| §4.3, Def. 4.4                  | a definition of pomsets with predicate transformers      | `Pomset.v`, `Record pomset` and <br /> `Record wf` (well-formedness predicate) |
-| §4.3, Fig. 1 and §9.4, Def. 9.6 | the PwT semantics extended to allow if-closure           | `Semantics.v`, `Inductive Semantics`                                           |
-| ---                             | ---                                                      | ---                                                                            |
-| §4.3, Lemma 4.5a                | `skip` as an identity element for the semicolon operator | `SeqSkipId.v`, lemmas  <br /> `skip_seq_id_left` and `skip_seq_id_right`       |
-| §4.3, Lemma 4.5b                | associativity of the semicolon operator                  | `SeqAssoc.v`, lemma `seq_assoc`                                                |
-| §4.3, Lemma 4.6e                | distribution of the if operator over semicolon           | `IfClosure.v`, lemma `if_closure`                                              |
+| Paper                                  | Description                                              | Coq file            | Coq statements                                                     |
+| ---                                    | ---                                                      | ---                 | ---                                                                |
+| §4.1                                   | definitions of statements _S_ and expressions _M_        | `Language.v`        | `Expr.t` and `Stmt.t`                                              |
+| §4.3, Def. 4.2                         | a definition of predicate transformers                   | `PredTransformer.v` | `Record predTransformer`                                           |
+| §4.3, Def. 4.4                         | a definition of pomsets with predicate transformers      | `Pomset.v`          | `Record pomset` and `Record wf` <br /> (well-formedness predicate) |
+| §4.3, Fig. 1 and <br /> §9.4, Def. 9.6 | the PwT semantics extended to allow if-closure           | `Semantics.v`       | `Inductive Semantics`                                              |
+| ---                                    | ---                                                      | ---                 | ---                                                                |
+| §4.3, Lemma 4.5a                       | `skip` as an identity element for the semicolon operator | `SeqSkipId.v`       | lemmas  `skip_seq_id_left` <br /> and `skip_seq_id_right`          |
+| §4.3, Lemma 4.5b                       | associativity of the semicolon operator                  | `SeqAssoc.v`        | lemma `seq_assoc`                                                  |
+| §4.3, Lemma 4.6e                       | distribution of the if operator over semicolon           | `IfClosure.v`       | lemma `if_closure`                                                 |
 
 Our proofs of the lemmas use the following axioms (and no other assumptions):
 - Excluded middle, XM (`classic` from `Coq.Logic.Classical_Prop`);
 - (Dependent) Functional Extensionality, (D)FE (`functional_extensionality_dep` from `Coq.Logic.FunctionalExtensionality`);
 - Constructive Definite Description, CDD (`constructive_definite_description` from `Coq.Logic.Description`).
 
-You may check that by taking a look at `skip_seq_id_left.axioms.out`, `skip_seq_id_right.axioms.out`, `seq_assoc.axioms.out` and `if_closure.axioms.out`.
+You may check that by taking a look at files
+- `skip_seq_id_left.axioms.out`, `skip_seq_id_right.axioms.out`, `seq_assoc.axioms.out`, and `if_closure.axioms.out`.
+
 They are generated during the project compilation by `Print Assumptions` instructions at the end of `SeqSkipId.v`, `SeqAssoc.v`, and `IfClosure.v` files.
 
-To check that the project does not contain admitted facts, you may want to run the following script:
+To check that the project does not contain admitted facts, you may want to run the following script from the project's root folder:
 
 ``` bash
-grep dmit /home/vagrant/artifact/src/*.v
+grep dmit src/*.v
 
 ```
 

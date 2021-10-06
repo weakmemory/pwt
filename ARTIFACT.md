@@ -1,7 +1,11 @@
 # Pomsets w/ Transformers (a Coq formalization)
 
-This repository contains Coq code supplementing the paper _Leaky Semicolon: Compositional Semantic Dependencies for Relaxed-Memory Concurrency_ by 
+This artifact contains Coq code supplementing the paper _Leaky Semicolon: Compositional Semantic Dependencies for Relaxed-Memory Concurrency_ by 
 Alan Jeffrey, James Riely, Mark Batty, Simon Cooksey, Ilya Kaysin, and Anton Podkopaev.
+
+#### Quick links
+- Browse the development at GitHub: [online](https://github.com/weakmemory/pwt)
+- VirtualBox image: [online](https://podkopaev.net/popl22-pwt-artifact.html)
 
 ## Getting started
 The artifact consists of Coq formalization and proofs about _Pomsets w/ Transformers_.
@@ -15,7 +19,8 @@ Below, we provide guidance for both approaches.
 You need to get a [VirtualBox](https://www.virtualbox.org/) (tested w/ version 6.1.26) on your system and import the VM
 `pwt.ova`. Please, note the following:
 - The VM should be provided with at least 8GB of RAM.
-- The VM is a Ubuntu 20.04 with `coq`, `coqide`, `vim` and `emacs` being set-up.
+- The VM is better to be provided with 4 CPUs (but 2 CPUs should be enough).
+- The VM is a Ubuntu 18.04 with `coq`, `coqide`, `vim` and `emacs` being set-up.
 - Username and password are both `vagrant`.
 
 The Coq code can be found in the folder `/home/vagrant/artifact`. To compile it,

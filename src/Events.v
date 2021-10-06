@@ -18,13 +18,3 @@ Module Event.
   Qed.
 
 End Event.
-
-(* Definition event := nat. *)
-  (* { *)
-  (* event_thread : thread_id; *)
-  (* threadlocal_id : nat; *)
-  (* }. *)
-
-(* Definition eq_event e e' := *)
-(*   Basic.Ident.eqb (event_thread e) (event_thread e') && *)
-(*   eqn (threadlocal_id e) (threadlocal_id e'). *)

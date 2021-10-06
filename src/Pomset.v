@@ -18,6 +18,23 @@ Open Scope program_scope.
 
 Set Implicit Arguments.
 
+(** In this file we define Pomsets with Predicate Transformers (PwT).
+    The definition comprises three main parts:
+
+    * Record pomset defines PwTs substantively
+      as a tuple of several components.
+
+    * Record wf (well-formedness) defines the required properties
+      that should hold for components of any PwT.
+
+    * Record cand (candidate) 
+*)
+
+
+(* This record corresponds to Definition 4.4.
+   It defines PwT as a tuple (𝐸, 𝜆, 𝜅, 𝜏 , ✓, ⊴, rf, rmw).
+   Notice that in paper, rf is added 
+ *)
 Record pomset := {
   (* M1 *)
   events : list Event.t;
@@ -38,7 +55,6 @@ Record pomset := {
   (* M6 *)
   (* Dependency order ⊴ *)
   dep    : relation Event.t;
-
   }.
 
 Definition events_set P := lset (events P).
@@ -434,8 +450,6 @@ Proof.
                 unfold strict_partial_order; pomset_equiv_rewrite; apply WF
               end.
 
-  (* { eapply generalized_lconsistent_more; (try by apply WF); auto. *)
-  (*   reflexivity. } *)
   { by eapply pomset_equiv_pt; try apply WF. }
   2: by intro AA; apply NOTINE, EQ.
 

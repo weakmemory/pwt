@@ -52,10 +52,6 @@ Let rf1 := rf P1.
 Let rf2 := rf P2.
 Let rf := rf P.
 
-Let rmw1 := rmw P1.
-Let rmw2 := rmw P2.
-Let rmw := rmw P.
-
 Notation "'R'" := (fun a => is_r' (λ a)).
 Notation "'W'" := (fun a => is_w' (λ a)).
 Notation "'F'" := (fun a => is_f' (λ a)).
@@ -66,7 +62,6 @@ Record pomset_union :=
     dep_restr2      : restr_rel E2 dep    ≡ dep2;
     rf_restr1       : restr_rel E1 rf     ≡ rf1;
     rf_restr2       : restr_rel E2 rf     ≡ rf2;
-    rmw_union       : rmw                 ≡ rmw1 ∪ rmw2;
   }.
 
 Lemma dep_union (PU : pomset_union) : dep1 ∪ dep2 ⊆ dep.
@@ -88,7 +83,6 @@ Record SKIP :=
     skip_pt     : forall D ψ, τ D ψ ⇔ ψ;
     skip_term   : term   ⇔ Formula.tt;
     skip_dep    : dep    ≡ ∅₂;
-    skip_rmw    : rmw    ≡ ∅₂;
     skip_rf     : rf     ≡ ∅₂;
     skip_κ      : forall e, κ e ⇔ Formula.tt;
     skip_λ      : forall e, λ e = def_action;
@@ -203,7 +197,6 @@ Record LETT (r : Reg.t) (m : Expr.t) :=
     let_pt     : forall D ψ, τ D ψ ⇔ Formula.subst_reg ψ r m;
     let_term   : term     ⇔ Formula.tt;
     let_dep    : dep      ≡ ∅₂;
-    let_rmw    : rmw      ≡ ∅₂;
     let_rf     : rf       ≡ ∅₂;
     let_κ      : forall e, κ e ⇔ Formula.tt;
     let_noereg : Expr.no_eregs m;
@@ -235,7 +228,6 @@ Record FENCE (α : thread_id) (μ : mode) :=
                         else Formula.tt;
 
     fence_dep    : dep    ≡ ∅₂;
-    fence_rmw    : rmw    ≡ ∅₂;
     fence_rf     : rf     ≡ ∅₂;
   }.
 
@@ -295,7 +287,6 @@ Record READ (α : thread_id) (r : Reg.t)
                       else Formula.tt;
 
   read_dep    : dep    ≡ ∅₂;
-  read_rmw    : rmw    ≡ ∅₂;
   read_rf     : rf     ≡ ∅₂;
 
   read_ϕ_ereg : forall e, Formula.used_eregs (ϕ e) = nil;
@@ -335,7 +326,6 @@ Record WRITE (α : thread_id) (x : location)
   write_term : term ⇔ κE;
 
   write_dep    : dep    ≡ ∅₂;
-  write_rmw    : rmw    ≡ ∅₂;
   write_rf     : rf     ≡ ∅₂;
 
   write_noereg : Expr.no_eregs m;
@@ -391,21 +381,21 @@ Inductive Semantics (α : thread_id) (s : Stmt.t) (P : pomset) : Prop :=
 Ltac pomset_big_simplifier :=
   match goal with
   | PE : SKIP _ |- _ =>
-    rewrite ?(skip_dep PE), ?(skip_rmw PE), ?(skip_rf PE),
+    rewrite ?(skip_dep PE), ?(skip_rf PE),
             ?(skip_κ PE), ?(skip_λ PE)
   | PE : LETT _ _ _ |- _ =>
-    rewrite ?(let_dep PE), ?(let_rmw PE), ?(let_rf PE),
+    rewrite ?(let_dep PE), ?(let_rf PE),
             ?(let_κ PE), ?(let_λ PE)
   | PE : READ _ _ _ _ _ _ _ |- _ =>
-    rewrite ?(read_dep PE), ?(read_rmw PE), ?(read_rf PE),
+    rewrite ?(read_dep PE), ?(read_rf PE),
             ?(read_κ PE), ?(read_λ PE); unfold read_κ_def
   | PE : WRITE _ _ _ _ _ _ |- _ =>
-    rewrite ?(write_dep PE), ?(write_rmw PE),
+    rewrite ?(write_dep PE),
             ?(write_rf PE),
             ?(write_κ PE),
             ?(write_λ PE); unfold write_κ_def
   | PE : FENCE _ _ _ |- _ =>
-    rewrite ?(fence_dep PE), ?(fence_rmw PE),
+    rewrite ?(fence_dep PE),
             ?(fence_rf PE),
             ?(fence_κ PE),
             ?(fence_λ PE)

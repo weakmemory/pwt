@@ -100,12 +100,10 @@ Proof.
     split; [|basic_solver].
     rewrite <- E1.
     rewrite restr_relE. apply (wf_depE WF0). }
-  { rewrite <- (rf_restr1 (seq_pomset_union PE)).
-    split; [|basic_solver].
-    rewrite <- E1.
-    rewrite restr_relE. apply (wf_rfE_ WF0). }
-  rewrite (rmw_union (seq_pomset_union PE)).
-  pomset_big_simplifier. basic_solver.
+  rewrite <- (rf_restr1 (seq_pomset_union PE)).
+  split; [|basic_solver].
+  rewrite <- E1.
+  rewrite restr_relE. apply (wf_rfE_ WF0).
 Qed.
 
 Lemma skip_seq_id_left (α : thread_id) s :
@@ -160,12 +158,10 @@ Proof.
     split; [|basic_solver].
     rewrite <- E2.
     rewrite restr_relE. apply (wf_depE WF0). }
-  { rewrite <- (rf_restr2 (seq_pomset_union PE)).
-    split; [|basic_solver].
-    rewrite <- E2.
-    rewrite restr_relE. apply (wf_rfE_ WF0). }
-  rewrite (rmw_union (seq_pomset_union PE)).
-  pomset_big_simplifier. basic_solver.
+  rewrite <- (rf_restr2 (seq_pomset_union PE)).
+  split; [|basic_solver].
+  rewrite <- E2.
+  rewrite restr_relE. apply (wf_rfE_ WF0).
 Qed.
 
 Redirect "skip_seq_id_right.axioms" Print Assumptions skip_seq_id_right.

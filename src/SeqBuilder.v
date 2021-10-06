@@ -43,7 +43,6 @@ Definition t := {|
   λ      := tlambda;
   κ      := seq_κ_def P1 P2 tlambda tdep;
   τ D ψ  := τ P1 D (τ P2 D ψ);
-  rmw    := rmw P1 ∪ rmw P2;
   term   := term P1 ∧ (τ P1 (events_set P1) (term P2));
   rf     := trf;
           |}.

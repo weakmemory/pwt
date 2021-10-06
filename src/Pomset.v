@@ -40,9 +40,6 @@ Record pomset := {
   dep    : relation Event.t;
 
   rf     : relation Event.t;
-
-  (* M9 *)
-  rmw    : relation Event.t;
   }.
 
 Definition events_set P := lset (events P).
@@ -68,7 +65,6 @@ Record pomset_equiv :=
   term_equiv    : term P ⇔ term P';
   dep_equiv     : dep    P ≡ dep    P';
   rf_equiv      : rf  P    ≡ rf  P';
-  rmw_equiv     : rmw P    ≡ rmw P';
   }.
 
 Record pomset_superset :=
@@ -81,7 +77,6 @@ Record pomset_superset :=
   sup_τ        : forall e_set φ, e_set ⊆₁ E' -> τ P' φ = τ P φ;
   sup_dep      : dep P' ⊆ dep P;
   sup_rf       : rf P' ⊆ rf P;
-  sup_rmw      : rmw P' ⊆ rmw P;
   }.
 
 Record thread_restricted_pomset (α : thread_id) :=
@@ -116,8 +111,6 @@ Ltac pomset_equiv_rewrite :=
            rewrite (term_equiv EQ)
          | EQ : pomset_equiv _ _ |- _ =>
            rewrite (dep_equiv EQ)
-         | EQ : pomset_equiv _ _ |- _ =>
-           rewrite (rmw_equiv EQ)
          | EQ : pomset_equiv _ _ |- _ =>
            rewrite (κ_equiv EQ)
          | EQ : pomset_equiv _ _ |- _ =>
@@ -159,7 +152,6 @@ Notation "'term'" := (term P).
 
 Notation "'dep'" := (dep P).
 Notation "'rf'" := (rf P).
-Notation "'rmw'" := (rmw P).
 
 Notation "e1 ⊴ e2" := (dep e1 e2) (at level 14).
 
@@ -288,32 +280,10 @@ Record wf :=
     wf_depE        : dep ≡ ⦗E⦘ ⨾ dep ⨾ ⦗E⦘;
 
 
-    (* M10 *)
-    wf_rmw_functional : functional rmw;
-
-    (* M10a *)
-    wf_rmw_blocks : rmw ⊆ (λ ⋄ blocks);
-
-    (* M10b *)
-    wf_rmw_dep : rmw ⊆ dep;
-
-    (* M10C (i) *)
-    wf_rmw_atom_dep_w    : (dep    ⨾ rmw⁻¹) ∩ (λ ⋄ overlaps) ⊆ dep^?;
-
-    (* M10C (ii) *)
-    wf_rmw_atom_dep_r    : rmw⁻¹ ⨾ (λ ⋄ overlaps) ∩ dep     ⊆ dep^?;
-
     wf_ninEλ : forall e (NIN : ~ E e), λ e = def_action;
     wf_ninEκ : forall e (NIN : ~ E e), κ e ⇔ Formula.tt;
     wf_rfE_  : rf ≡ ⦗E⦘ ⨾ rf ⨾ ⦗E⦘;
   }.
-
-Lemma wf_rmwE_ (WF : wf) : rmw ≡ ⦗E⦘ ⨾ rmw ⨾ ⦗E⦘.
-Proof using.
-  apply dom_helper_3.
-  rewrite wf_rmw_dep, wf_depE; auto.
-  basic_solver.
-Qed.
 
 Lemma wf_pt_family_subset (WF : wf) D C (EQ : C ⊆₁ D) ψ: τ C ψ ⊨ τ D ψ.
 Proof using.
@@ -385,7 +355,6 @@ Definition init_pomset : pomset :=
      term   := Formula.tt;
      dep    := ∅₂;
      rf     := ∅₂;
-     rmw    := ∅₂;
   |}.
 
 Lemma wf_init_pomset : wf init_pomset.
@@ -408,7 +377,6 @@ Definition local_initialized_pomset (regs : list Reg.t) : pomset :=
       term   := Formula.ff;
       dep    := ∅₂;
       rf     := ∅₂;
-      rmw    := ∅₂;
   |}.
 
 Add Morphism lconsistent with signature

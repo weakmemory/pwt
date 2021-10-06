@@ -88,7 +88,6 @@ Proof.
            λ      := P12lambda;
            κ      := seq_κ_def P1 P2 P12lambda P12dep;
            τ D ψ  := τ P1 D (τ P2 D ψ);
-           rmw    := rmw P1 ∪ rmw P2;
            term   := term P1 ∧ (τ P1 (events_set P1) (term P2));
            rf     := restr_rel (events_set P1 ∪₁ events_set P2) (rf P0);
           |}
@@ -167,10 +166,6 @@ Proof.
     rewrite restr_restr, EVENTS23.
     basic_solver 10. }
 
-  assert (rmw P0 ≡ rmw P1 ∪ (rmw P2 ∪ rmw P3)) as RMW0.
-  { rewrite rmw_union with (P:=P0 ); [|by apply PE].
-    now rewrite rmw_union with (P:=P23); [|by apply PE0]. }
-
   assert (forall φ, τ P2 (events_set P23) (τ P3 (events_set P23) φ)
                   ⇔ τ P2 (events_set P2) (τ P3 (events_set P3) φ))
   as PT_COMP23.
@@ -181,13 +176,6 @@ Proof.
     apply pt_more; [by apply WF2|].
     apply  wf_pt_family_equiv_on_E; eauto.
     rewrite EVENTS23; basic_solver. }
-
-  assert (rmw P1 ∪ rmw P2 ⊆ restr_rel (events_set P1 ∪₁ events_set P2) (rmw P0))
-    as RMW12REST.
-  { rewrite (wf_rmwE_ WF1), (wf_rmwE_ WF2).
-    arewrite (rmw P1 ⊆ rmw P0) by (rewrite RMW0; eauto with hahn).
-    arewrite (rmw P2 ⊆ rmw P0) by (rewrite RMW0; eauto with hahn).
-    basic_solver. }
 
   assert (forall r,
              restr_rel (events_set P1 ∪₁ events_set P2)
@@ -229,23 +217,7 @@ Proof.
     all: try now constructor;
       [ apply irreflexive_restr, WF | apply transitive_restr, WF].
     all: unfold events_set; ins. 
-    all: ins; rewrite ?lset_app, ?restr_rel2E; auto.
-    { eapply functional_mori; [|by apply WF].
-      rewrite RMW0. red. basic_solver. }
-    { rewrite RMW12REST.
-      etransitivity.
-      2: by apply inclusion_restr with (dom:=events_set P1 ∪₁ events_set P2).
-      rewrite P12λmap.
-      apply restr_rel_mori; [easy|apply WF]. }
-    { rewrite (wf_rmw_dep WF1), (wf_rmw_dep WF2).
-      rewrite <- DEP_0_1, <- DEP_0_2.
-      basic_solver. }
-    { rewrite RMW12REST, <- restr_transp, seq_restr, P12λmapAlt.
-      now rewrite <- restr_rel_cr; apply restr_rel_mori; [easy|apply WF]. }
-    rewrite <- inter_restr_absorb_l, P12λmap, <- restr_inter.
-    rewrite RMW12REST, <- restr_transp, seq_restr.
-    by rewrite <- restr_rel_cr; apply restr_rel_mori; [easy|apply WF]. }
-
+    all: ins; rewrite ?lset_app, ?restr_rel2E; auto. }
   (* Semantics α (Stmt.seq s1 (Stmt.seq s2 s3)) P0 *)
   (*  Semantics α (Stmt.seq (Stmt.seq s1 s2) s3) P0 *)
   eapply interp_seq with (P1 := P12) (P2 := P3); eauto.
@@ -272,10 +244,7 @@ Proof.
     { (* events_set P0 ≡₁ events_set P12 ∪₁ events_set P3 *)
       erewrite events_union with (P:=P0) (P2:=P23); eauto.
       rewrite EVENTS23, EVENTS12. basic_solver. }
-    all: try now rewrite EVENTS12.
-    (* rmw P0 ≡ rmw P1 ∪ rmw P2 ∪ rmw P3 *)
-    rewrite RMW0, unionA; done. }
-
+    now rewrite EVENTS12. }
   { (* label_union P0 P12 P3 *)
     constructor.
     2: { intros eP3.
@@ -468,7 +437,6 @@ Proof.
            λ      := P23lambda;
            κ      := seq_κ_def P2 P3 P23lambda P23dep;
            τ D ψ  := τ P2 D (τ P3 D ψ);
-           rmw    := rmw P2 ∪ rmw P3;
            term   := term P2 ∧ (τ P2 (events_set P2) (term P3));
            rf     := restr_rel (events_set P2 ∪₁ events_set P3) (rf P0);
           |}
@@ -543,10 +511,6 @@ Proof.
     rewrite restr_restr, EVENTS12.
     basic_solver 10. }
   
-  assert (rmw P0 ≡ rmw P1 ∪ rmw P2 ∪ rmw P3) as RMW0.
-  { rewrite rmw_union with (P:=P0 ); [|by apply PE].
-    now rewrite rmw_union with (P:=P12); [|by apply PE0]. }
-  
   assert ( forall φ, τ P1 (events_set P12) (τ P2 (events_set P12) φ)
                   ⇔ τ P1 (events_set P1) (τ P2 (events_set P2) φ))
   as PT_COMP12.
@@ -557,13 +521,6 @@ Proof.
     apply pt_more; [by apply WF1|].
     apply  wf_pt_family_equiv_on_E; eauto.
     rewrite EVENTS12; basic_solver. }
-
-  assert (rmw P2 ∪ rmw P3 ⊆ restr_rel (events_set P2 ∪₁ events_set P3) (rmw P0))
-    as RMW23REST.
-  { rewrite (wf_rmwE_ WF2), (wf_rmwE_ WF3).
-    arewrite (rmw P2 ⊆ rmw P0) by (rewrite RMW0; eauto with hahn).
-    arewrite (rmw P3 ⊆ rmw P0) by (rewrite RMW0; eauto with hahn).
-    basic_solver. }
 
   assert (forall r,
              restr_rel (events_set P2 ∪₁ events_set P3)
@@ -605,23 +562,7 @@ Proof.
     all: try now constructor;
       [ apply irreflexive_restr, WF | apply transitive_restr, WF].
     all: unfold events_set; ins.
-    all: ins; rewrite ?lset_app, ?restr_rel2E; auto.
-    { eapply functional_mori; [|by apply WF].
-      rewrite RMW0. red. basic_solver. }
-    { rewrite RMW23REST.
-      etransitivity.
-      2: by apply inclusion_restr with (dom:=events_set P2 ∪₁ events_set P3).
-      rewrite P23λmap.
-      apply restr_rel_mori; [easy|apply WF]. }
-    { rewrite (wf_rmw_dep WF2), (wf_rmw_dep WF3).
-      rewrite <- DEP_0_2, <- DEP_0_3.
-      basic_solver. }
-    { rewrite RMW23REST, <- restr_transp, seq_restr, P23λmapAlt.
-      by rewrite <- restr_rel_cr; apply restr_rel_mori; [easy|apply WF]. }
-    rewrite <- inter_restr_absorb_l, P23λmap, <- restr_inter.
-    rewrite RMW23REST, <- restr_transp, seq_restr.
-    by rewrite <- restr_rel_cr; apply restr_rel_mori; [easy|apply WF]. }
-
+    all: ins; rewrite ?lset_app, ?restr_rel2E; auto. } 
   (* Semantics α (Stmt.seq s1 (Stmt.seq s2 s3)) P0 *)
   eapply interp_seq with (P1 := P1) (P2 := P23); eauto.
   { (* Semantics α (Stmt.seq s2 s3) P23 *)
@@ -645,12 +586,7 @@ Proof.
     { (* events_set P0 ≡₁ events_set P1 ∪₁ events_set P23 *)
       erewrite events_union with (P:=P0) (P1:=P12); eauto.
       rewrite EVENTS12, EVENTS23. basic_solver. }
-    all: try now rewrite EVENTS23.
-    (* rmw P1 ∪ rmw P23 ≡ rmw P0 *)
-    rewrite <- unionA.
-    erewrite rmw_union with (P:=P0); eauto.
-    erewrite rmw_union with (P:=P12) (P2:=P2); eauto with hahn. }
-
+    now rewrite EVENTS23. }
   { (* label_union P0 P1 P23 *)
     constructor.
     { intros eP1.

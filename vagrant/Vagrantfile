@@ -2,12 +2,12 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/bionic64"
-  config.vm.box_url = " https://app.vagrantup.com/ubuntu/boxes/bionic64/versions/20210928.0.0/providers/virtualbox.box"
+  config.vm.box_url = "https://app.vagrantup.com/ubuntu/boxes/bionic64/versions/20210928.0.0/providers/virtualbox.box"
 
   config.vm.provider :virtualbox do |v|
     v.gui = true
-    v.cpus = 4
-    v.memory = 8192
+    v.cpus = 32
+    v.memory = 32768
     # see https://github.com/joelhandwell/ubuntu_vagrant_boxes/issues/1
     # for the problem discussion and other possible solutions
     v.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
@@ -60,6 +60,7 @@ Vagrant.configure("2") do |config|
   # config.vm.provision :shell, privileged: false, inline: "ln -sf ~/artifact/paper.pdf ~/Desktop/paper.pdf"
   config.vm.provision :shell, privileged: false, inline: "ln -sf ~/artifact/README.md ~/Desktop/README.md"
   config.vm.provision :shell, privileged: false, inline: "ln -sf ~/artifact/src ~/Desktop/src"
+  config.vm.provision :shell, privileged: false, inline: "ln -sf ~/artifact/pomsets-with-predicate-transformers ~/Desktop/PwTer"
 
   # install and configure Proof General
   config.vm.provision :shell, inline: "sudo apt install -y ttf-ancient-fonts"
@@ -85,4 +86,10 @@ Vagrant.configure("2") do |config|
   # make project
   config.vm.provision :shell, privileged: false, inline: "cd ~/artifact_compiled; make -j 4"
   
+  # install required pwter packages
+  config.vm.provision :shell, inline: "sudo apt install -y python2.7 build-essential"
+  config.vm.provision :shell, privileged: false, inline: "opam install -y dune batteries fmt menhir ocamlgraph ounit2 z3"
+
+  # build pwter
+  config.vm.provision :shell, privileged: false, inline: "cd ~/artifact/pomsets-with-predicate-transformers; make"
 end

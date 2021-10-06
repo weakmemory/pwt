@@ -18,8 +18,13 @@ Set Implicit Arguments.
 
 Local Open Scope formula_scope.
 
+(** * Semantics
+    In this file, we define semantics of programs as on Fig. 1.
+
+    - Records [SKIP], [SEQ], [READ], ets. shadow the corresponding predicates on Fig.1.
+    - Inductive type [Semantics] defines semantic brackets [[[ ... ]]]
+ *)
 Section Semantics.
-(* Local Open Scope auxdef_scope. *)
 
 Variable P P1 P2 : pomset.
 
@@ -119,25 +124,14 @@ Definition seq_κ_def l dep_rel (e : Event.t) :=
 
 Record SEQ :=
   {
-    (* S1 S6 S8 S9 *)
+    (* S1 S6 *)
     seq_pomset_union : pomset_union;
 
     (* S2 *)
     seq_label_union : label_union;
-    (* seq_label_union : forall e, ((E1 \₁ E2) e -> λ e = λ1 e) /\ *)
-    (*                            ((E2 \₁ E1) e -> λ e = λ2 e) /\ *)
-    (*                            ((E1 ∩₁ E2) e -> merge (λ1 e) (λ2 e) (λ e)); *)
 
     (* S3 *)
     seq_κ : forall e, κ e ⇔ seq_κ_def λ dep e;
-
-    (* seq_precondition : forall e, *)
-    (*     let pref  := (prefix (dep \ eq) ((eq e) ∩₁ (W ∪₁ F))) *)
-    (*                    ∪₁ dom_rel (E1 × ((eq e) ∩₁ R)) in *)
-    (*     let κ2'e  := τ1 pref (κ2 e) in *)
-    (*     << EK1  : (E1 \₁ E2) e -> κ e ⇔ κ1 e >> /\ *)
-    (*     << EK2  : (E2 \₁ E1) e -> κ e ⇔ κ2'e >> /\ *)
-    (*     << EK12 : (E1 ∩₁ E2) e -> κ e ⇔ (κ1 e ∨ κ2'e) >>; *)
 
     (* S4 *)
     seq_pt : forall D ψ, τ D ψ ⇔ τ1 D (τ2 D ψ);
@@ -162,7 +156,7 @@ Definition if_κ_def φ (e : Event.t) :=
 
 Record IFF (φ : Formula.t) :=
   {
-    (* I1 I6 I8 I9 *)
+    (* I1 I6 *)
     if_pomset_union : pomset_union;
 
     (* I2 *)
@@ -180,6 +174,7 @@ Record IFF (φ : Formula.t) :=
     if_wf : wf P;
   }.
 
+(* Corresponds to ASSIGN in Fig.1 *)
 Record LETT (r : Reg.t) (m : Expr.t) :=
   { let_events : E ≡₁ ∅;
     let_pt     : forall D ψ, τ D ψ ⇔ Formula.subst_reg ψ r m;
@@ -242,6 +237,7 @@ Definition read_τ_def r x v ϕ D ψ s :=
   (Formula.conj_list (map (fun e => ¬ (ϕ e)) E_list) ⇒
    Formula.subst_reg ψ r (Expr.reg s)).
 
+(** Corresponds to READ from Definition 9.4 *)
 Record READ (α : thread_id) (r : Reg.t)
        (μ : mode) (x : location)
        (v : Events.Event.t -> Events.value)
@@ -268,22 +264,24 @@ Record READ (α : thread_id) (r : Reg.t)
   read_pt : forall D ψ s,
       τ D ψ ⇔ read_τ_def r x v ϕ D ψ s;
 
+  (* R5 *)
   read_term : term ⇔ ifP mode_le Oacq μ /\ E ≡₁ ∅
                       then κE
                       else Formula.tt;
 
   read_dep    : dep    ≡ ∅₂;
 
+  (* R6 *)
   read_ϕ_ereg : forall e, Formula.used_eregs (ϕ e) = nil;
 }.
 
 Definition write_κ_def m v e :=
   ifP E e then Formula.eqEE m (Expr.val (v e)) else Formula.tt.
 
+(** Corresponds to WRITE from Definition 9.4 *)
 Record WRITE (α : thread_id) (x : location)
        (m : Expr.t) (μ : mode) (v : Events.Event.t -> Events.value) := {
   (* W1 *)
-  (* if κ (d) ∧ κ (e) is satisfiable then d = e, *)
   write_events : forall e d (INe : E e) (INd : E d)
                    (SAT : Formula.satisfiable (κ e ∧ κ d)),
                  e = d;
@@ -312,6 +310,7 @@ Record WRITE (α : thread_id) (x : location)
 
   write_dep    : dep    ≡ ∅₂;
 
+  (* W6 *)
   write_noereg : Expr.no_eregs m;
   write_sat    : forall e (IN : E e),
       Formula.satisfiable (Formula.eqEE m (Expr.val (v e)));
@@ -319,14 +318,11 @@ Record WRITE (α : thread_id) (x : location)
 
 End Semantics.
 
-(* Semantic brackets relation *)
-(* TODO: what about  CAS, FADD, and EXCHG? *)
-(* TODO: Can it be simplified using pattern matching? *)
+(** Semantic brackets relation shadowing Fig. 1 *)
 Inductive Semantics (α : thread_id) (s : Stmt.t) (P : pomset) : Prop :=
 
 | interp_skip (stmt_eq : s = Stmt.skip) (PE : SKIP P)
 
-(* TODO: get rid of lambda *)
 | interp_assign r m
                 (stmt_eq : s = Stmt.assign r m)
                 (PE : LETT P r m)
@@ -401,7 +397,6 @@ Proof.
   all: pomset_big_simplifier.
   all: eauto using strict_partial_order_empty with hahn.
 
-  (* TODO: for some reason morphism strict_partial_order_more doesn't work  *)
   all: try by match goal with
               | |- strict_partial_order _ => 
                 unfold strict_partial_order; pomset_big_simplifier;
@@ -594,13 +589,7 @@ Proof.
       apply Forall_forall; ins.
       apply impl_preserves_pt, pt_f_subst_reg. }
 
-  (* all: try (erewrite !(read_pt_empty PE _ _ _ P_EMPTY); desf; easy). *)
-  (* { desf; [by apply P_EMPTY in e0 |]. *)
-  (*   eapply tautology_lconsistent; taut_solver. } *)
   (** READ, non_empty case **)
-  (* { desf; [ by apply q_lconsistent *)
-  (*         | by apply tautology_lconsistent; taut_solver]. } *)
-
   all: erewrite !(read_pt PE) in *; eauto.
   4: { unfold read_τ_def in *.
        desc; ins.
@@ -657,7 +646,6 @@ Proof.
        all: apply Forall2_map_map; intros e IN.
        all: apply in_filterP_iff in IN; desf; ins.
        all: apply disj_more.
-       (* TODO: need smth about absense of unrelated eregs in ϕ? *)
        1,3: now rewrite NO_SUBST_EREG.
        all: do 2 desf.
        all: rewrite subst_ereg_val_subst_reg_commute; ins.

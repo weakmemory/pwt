@@ -18,23 +18,19 @@ Open Scope program_scope.
 
 Set Implicit Arguments.
 
-(** In this file we define Pomsets with Predicate Transformers (PwT).
-    The definition comprises three main parts:
+(** * Pomsets with Predicate Transformers
 
-    * Record pomset defines PwTs substantively
-      as a tuple of several components.
+    In this file we define Pomsets with Predicate Transformers (PwT)
+    (corresponding to Definition 4.4).
 
-    * Record wf (well-formedness) defines the required properties
-      that should hold for components of any PwT.
-
-    * Record cand (candidate) 
+    The definition comprises three parts:
+    - [Record pomset] defines _components_ of PwTs.
+    - [Record wf] (well-formedness) defines _properties_ of PwTs.
+    - [Record complete] defines properties making a PwT _complete_
 *)
 
 
-(* This record corresponds to Definition 4.4.
-   It defines PwT as a tuple (𝐸, 𝜆, 𝜅, 𝜏 , ✓, ⊴, rf, rmw).
-   Notice that in paper, rf is added 
- *)
+(** Defines _components_ of PwT as a tuple (𝐸,𝜆,𝜅,𝜏,✓,⊴). *)
 Record pomset := {
   (* M1 *)
   events : list Event.t;
@@ -87,7 +83,6 @@ Record pomset_superset :=
   sup_λ        : forall e (EE : E' e), λ P' e = λ P e;
   sup_κ        : forall e (EE : E' e), κ P' e = κ P e;
 
-  (* TODO: should e_eset be used? *)
   sup_τ        : forall e_set φ, e_set ⊆₁ E' -> τ P' φ = τ P φ;
   sup_dep      : dep P' ⊆ dep P;
   }.
@@ -155,7 +150,6 @@ Variable P : pomset.
 
 Notation "'E'" := (events_set P).
 
-(* TODO: can it be done using implicits? *)
 Notation "'λ'" := (λ P).
 Notation "'τ'" := (τ P).
 Notation "'κ'" := (κ P).
@@ -225,7 +219,6 @@ Proof.
   unfold θ. by rewrite flat_map_app.
 Qed.
 
-
 Open Scope list_additional_scope.
 
 Lemma theta_list_minus l l' lbl :
@@ -263,12 +256,10 @@ Proof.
   all: by unfold compose, is_r in Heq0; ins; desf.
 Qed.
 
+(** Defines _properties_ of PwT. It shadows Definitions 4.4 and A.2. *)
 Record wf :=
   {
-    (* M3a *)
-    (* wf_precondition_lconsistent : forall e, lconsistent (κ e); *)
-
-    (* M4 *)
+    (* M4 with 𝜆-consistency (see Definition A.2) *)
     wf_pt : forall D,  predTransformer (τ D);
     wf_lpt : forall D φ (CONS : lconsistent (τ D φ)), lconsistent φ;
 
@@ -276,9 +267,6 @@ Record wf :=
         Formula.subst_ereg_val (τ D φ) e_ext v
         ⇔
         τ D (Formula.subst_ereg_val φ e_ext v);
-
-    (* wf_kappa_se_indep : forall e e_ext v (NOTINE : ~ (events_set P e_ext)), *)
-    (*            Formula.subst_ereg_val (κ e) e_ext v ⇔ κ e; *)
 
     wf_pt_family : forall D C (CED : (C ∩₁ E) ⊆₁ D) ψ, τ C ψ ⊨ τ D ψ;
 
@@ -289,7 +277,8 @@ Record wf :=
     wf_dep_pord    : strict_partial_order dep;
     wf_depE        : dep ≡ ⦗E⦘ ⨾ dep ⨾ ⦗E⦘;
 
-
+    (* In COQ, functions are total.
+       As such, λ κ must be defined outside E as well. *)
     wf_ninEλ : forall e (NIN : ~ E e), λ e = def_action;
     wf_ninEκ : forall e (NIN : ~ E e), κ e ⇔ Formula.tt;
   }.
@@ -333,15 +322,15 @@ Proof.
   red. by constructor.
 Qed.
 
-Record cand :=
-  { cand_wf : wf;
+(** Defines a complete pomset, shadowing Definition 4.4 *)
+Record complete :=
+  { comp_wf : wf;
 
     (* C3 *)
-    cand_precondition : forall e, E e -> Formula.tautology (κ e);
+    comp_precondition : forall e, E e -> Formula.tautology (κ e);
 
     (* C5 *)
-    cand_termination : Formula.tautology term;
-
+    comp_termination : Formula.tautology term;
   }.
 
 End Pomset.
@@ -361,7 +350,6 @@ Proof.
   constructor; ins; try reflexivity.
   all: try by apply strict_partial_order_empty.
   all: try basic_solver 1.
-  (* { apply tautology_lconsistent. taut_solver. } *)
   constructor; ins; reflexivity.
 Qed.
 

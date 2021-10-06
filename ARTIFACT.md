@@ -48,7 +48,7 @@ After the project is compiled, you may want to check how the main definitions an
 | ---                                    | ---                                                      | ---                 | ---                                                                |
 | §4.1                                   | definitions of statements _S_ and expressions _M_        | `Language.v`        | `Expr.t` and `Stmt.t`                                              |
 | §4.3, Def. 4.2                         | a definition of predicate transformers                   | `PredTransformer.v` | `Record predTransformer`                                           |
-| §4.3, Def. 4.4                         | a definition of pomsets with predicate transformers; a definition of complete pomsets | `Pomset.v`          | `Record pomset`, `Record wf` <br /> (well-formedness predicate), and `Record complete` |
+| §4.3, Def. 4.4; §A.3, Def. A.2 | a definition of pomsets with predicate transformers; a definition of complete pomsets | `Pomset.v`          | `Record pomset`, `Record wf` <br /> (well-formedness predicate), and `Record complete` |
 | §4.3, Fig. 1 and <br /> §9.4, Def. 9.6 | the PwT semantics extended to allow if-closure           | `Semantics.v`       | `Inductive Semantics`                                              |
 | ---                                    | ---                                                      | ---                 | ---                                                                |
 | §4.3, Lemma 4.5a                       | `skip` as an identity element for the semicolon operator | `SeqSkipId.v`       | lemmas  `skip_seq_id_left` <br /> and `skip_seq_id_right`          |

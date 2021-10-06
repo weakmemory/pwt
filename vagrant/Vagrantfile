@@ -77,10 +77,10 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, privileged: false, inline: "opam install -y --assume-depexts coqide"
   config.vm.provision :shell, privileged: false, inline: "cp ~/artifact/vagrant/coqide.desktop ~/Desktop/"
   config.vm.provision :shell, inline: "sudo chmod a+x /home/vagrant/Desktop/coqide.desktop"
-  config.vm.provision :shell, privileged: false, inline: "gio set /home/vagrant/Desktop/coqide.desktop metadata::trusted true"
+  # config.vm.provision :shell, privileged: false, inline: "gio set /home/vagrant/Desktop/coqide.desktop metadata::trusted true"
   
-  # set a font to the terminal
-  config.vm.provision :shell, privileged: false, inline: "setfont /usr/share/consolefonts/Lat7-Terminus28x14.psf"
+  # # set a font to the terminal
+  # config.vm.provision :shell, privileged: false, inline: "setfont /usr/share/consolefonts/Lat7-Terminus28x14.psf"
 
   # make project
   config.vm.provision :shell, privileged: false, inline: "cd ~/artifact_compiled; make -j 4"

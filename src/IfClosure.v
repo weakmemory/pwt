@@ -37,13 +37,11 @@ Proof.
   
   set (P13lambda := SeqBuilder.tlambda P1 P3).
   set (P13dep := restr_rel (events_set P1 ∪₁ events_set P3) (dep P0)).
-  set (P13 := SeqBuilder.t P1 P3 P13dep
-                           (restr_rel (events_set P1 ∪₁ events_set P3) (rf P0))).
+  set (P13 := SeqBuilder.t P1 P3 P13dep).
 
   set (P23lambda := SeqBuilder.tlambda P2 P3).
   set (P23dep := restr_rel (events_set P2 ∪₁ events_set P3) (dep P0)).
-  set (P23 := SeqBuilder.t P2 P3 P23dep
-                           (restr_rel (events_set P2 ∪₁ events_set P3) (rf P0))).
+  set (P23 := SeqBuilder.t P2 P3 P23dep).
 
   assert (forall d (PD1 : events_set P1 d) (PD3 : events_set P3 d),
              λ P1 d = λ P3 d) as EQLAB13.

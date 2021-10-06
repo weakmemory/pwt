@@ -27,7 +27,7 @@ Context
   (α : thread_id)
   (s1 s2 : Stmt.t)
   (P1 P2 : pomset)
-  (tdep trf : relation Events.Event.t)
+  (tdep : relation Events.Event.t)
   (PE1 : Semantics α s1 P1)
   (PE2 : Semantics α s2 P2).
 
@@ -44,7 +44,6 @@ Definition t := {|
   κ      := seq_κ_def P1 P2 tlambda tdep;
   τ D ψ  := τ P1 D (τ P2 D ψ);
   term   := term P1 ∧ (τ P1 (events_set P1) (term P2));
-  rf     := trf;
           |}.
 
 Let E := events_set t.

@@ -96,14 +96,10 @@ Proof.
     etransitivity; [eby eapply wf_term|].
     apply pt_entails; [by apply WF1|].
     apply PE0. }
-  { rewrite <- (dep_restr1 (seq_pomset_union PE)).
-    split; [|basic_solver].
-    rewrite <- E1.
-    rewrite restr_relE. apply (wf_depE WF0). }
-  rewrite <- (rf_restr1 (seq_pomset_union PE)).
+  rewrite <- (dep_restr1 (seq_pomset_union PE)).
   split; [|basic_solver].
   rewrite <- E1.
-  rewrite restr_relE. apply (wf_rfE_ WF0).
+  rewrite restr_relE. apply (wf_depE WF0).
 Qed.
 
 Lemma skip_seq_id_left (α : thread_id) s :
@@ -154,14 +150,10 @@ Proof.
     { apply entails_elim_conj_l2; reflexivity. }
     apply entails_elim_conj_r; split; try reflexivity.
     apply entails_true. }
-  { rewrite <- (dep_restr2 (seq_pomset_union PE)).
-    split; [|basic_solver].
-    rewrite <- E2.
-    rewrite restr_relE. apply (wf_depE WF0). }
-  rewrite <- (rf_restr2 (seq_pomset_union PE)).
+  rewrite <- (dep_restr2 (seq_pomset_union PE)).
   split; [|basic_solver].
   rewrite <- E2.
-  rewrite restr_relE. apply (wf_rfE_ WF0).
+  rewrite restr_relE. apply (wf_depE WF0).
 Qed.
 
 Redirect "skip_seq_id_right.axioms" Print Assumptions skip_seq_id_right.

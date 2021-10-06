@@ -89,7 +89,6 @@ Proof.
            κ      := seq_κ_def P1 P2 P12lambda P12dep;
            τ D ψ  := τ P1 D (τ P2 D ψ);
            term   := term P1 ∧ (τ P1 (events_set P1) (term P2));
-           rf     := restr_rel (events_set P1 ∪₁ events_set P2) (rf P0);
           |}
        ).
   subst P12dep P12lambda.
@@ -148,23 +147,6 @@ Proof.
     as DEP_23_2.
   { rewrite (DEP_UB1 P23 P2 P3 PE0); auto. }
 
-  assert (restr_rel (events_set P3) (rf P0) ≡ rf P3)
-    as RF_0_3.
-  { erewrite <- rf_restr2 with (P2 := P3); [| by apply PE0].
-    erewrite <- rf_restr2 with (P2 := P23); [| by apply PE].
-    rewrite restr_restr, EVENTS23.
-    basic_solver 10. }
-
-  assert (restr_rel (events_set P1) (rf P0) ≡ rf P1)
-    as RF_0_1.
-  { erewrite rf_restr1 with (P2 := P23); auto. apply PE. }
-
-  assert (restr_rel (events_set P2) (rf P0) ≡ rf P2)
-    as RF_0_2.
-  { erewrite <- rf_restr1 with (P1 := P2); [| by apply PE0].
-    erewrite <- rf_restr2 with (P2 := P23); [| by apply PE].
-    rewrite restr_restr, EVENTS23.
-    basic_solver 10. }
 
   assert (forall φ, τ P2 (events_set P23) (τ P3 (events_set P23) φ)
                   ⇔ τ P2 (events_set P2) (τ P3 (events_set P3) φ))
@@ -241,10 +223,9 @@ Proof.
   { (* pomset_union P0 P12 P3 *)
     constructor; ins.
     all: inv PE; inv PE0.
-    { (* events_set P0 ≡₁ events_set P12 ∪₁ events_set P3 *)
-      erewrite events_union with (P:=P0) (P2:=P23); eauto.
-      rewrite EVENTS23, EVENTS12. basic_solver. }
-    now rewrite EVENTS12. }
+    (* events_set P0 ≡₁ events_set P12 ∪₁ events_set P3 *)
+    erewrite events_union with (P:=P0) (P2:=P23); eauto.
+    rewrite EVENTS23, EVENTS12. basic_solver. }
   { (* label_union P0 P12 P3 *)
     constructor.
     2: { intros eP3.
@@ -438,7 +419,6 @@ Proof.
            κ      := seq_κ_def P2 P3 P23lambda P23dep;
            τ D ψ  := τ P2 D (τ P3 D ψ);
            term   := term P2 ∧ (τ P2 (events_set P2) (term P3));
-           rf     := restr_rel (events_set P2 ∪₁ events_set P3) (rf P0);
           |}
        ).
   subst P23dep P23lambda.
@@ -497,20 +477,6 @@ Proof.
     as DEP_12_1.
   { rewrite (DEP_UB1 P12 P1 P2 PE0); auto. }
 
-  assert (restr_rel (events_set P2) (rf P0) ≡ rf P2)
-    as RF_0_2.
-  { erewrite <- rf_restr2 with (P2 := P2); [| by apply PE0].
-    erewrite <- rf_restr1 with (P1 := P12); [| by apply PE].
-    rewrite restr_restr, EVENTS12.
-    basic_solver 10. }
-
-  assert (restr_rel (events_set P1) (rf P0) ≡ rf P1)
-    as RF_0_1.
-  { erewrite <- rf_restr1 with (P1 := P1); [| by apply PE0].
-    erewrite <- rf_restr1 with (P1 := P12); [| by apply PE].
-    rewrite restr_restr, EVENTS12.
-    basic_solver 10. }
-  
   assert ( forall φ, τ P1 (events_set P12) (τ P2 (events_set P12) φ)
                   ⇔ τ P1 (events_set P1) (τ P2 (events_set P2) φ))
   as PT_COMP12.
@@ -570,9 +536,7 @@ Proof.
     constructor; ins; try reflexivity.
     { (* pomset_union P23 P2 P3 *)
       constructor; ins.
-      all: try now rewrite restr_restr, set_inter_absorb_l; auto with hahn.
-      rewrite restr_restr, set_inter_absorb_l; auto with hahn.
-      now erewrite <- rf_restr2 with (P2 := P3); [| by apply PE]. }
+      all: try now rewrite restr_restr, set_inter_absorb_l; auto with hahn. }
     (* label_union P23 P2 P3*)
     constructor; ins.
     { basic_solver. }
@@ -583,10 +547,9 @@ Proof.
   { (* pomset_union P0 P1 P23 *)
     constructor; ins.
     all: inv PE; inv PE0.
-    { (* events_set P0 ≡₁ events_set P1 ∪₁ events_set P23 *)
-      erewrite events_union with (P:=P0) (P1:=P12); eauto.
-      rewrite EVENTS12, EVENTS23. basic_solver. }
-    now rewrite EVENTS23. }
+    (* events_set P0 ≡₁ events_set P1 ∪₁ events_set P23 *)
+    erewrite events_union with (P:=P0) (P1:=P12); eauto.
+    rewrite EVENTS12, EVENTS23. basic_solver. }
   { (* label_union P0 P1 P23 *)
     constructor.
     { intros eP1.

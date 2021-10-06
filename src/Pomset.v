@@ -39,7 +39,6 @@ Record pomset := {
   (* Dependency order ⊴ *)
   dep    : relation Event.t;
 
-  rf     : relation Event.t;
   }.
 
 Definition events_set P := lset (events P).
@@ -64,7 +63,6 @@ Record pomset_equiv :=
                              (τ P) e_set φ ⇔ (τ P') e_set φ;
   term_equiv    : term P ⇔ term P';
   dep_equiv     : dep    P ≡ dep    P';
-  rf_equiv      : rf  P    ≡ rf  P';
   }.
 
 Record pomset_superset :=
@@ -76,7 +74,6 @@ Record pomset_superset :=
   (* TODO: should e_eset be used? *)
   sup_τ        : forall e_set φ, e_set ⊆₁ E' -> τ P' φ = τ P φ;
   sup_dep      : dep P' ⊆ dep P;
-  sup_rf       : rf P' ⊆ rf P;
   }.
 
 Record thread_restricted_pomset (α : thread_id) :=
@@ -113,8 +110,6 @@ Ltac pomset_equiv_rewrite :=
            rewrite (dep_equiv EQ)
          | EQ : pomset_equiv _ _ |- _ =>
            rewrite (κ_equiv EQ)
-         | EQ : pomset_equiv _ _ |- _ =>
-           rewrite (rf_equiv EQ)
          end.
 
 Lemma pomset_equiv_symmetric : symmetric pomset_equiv.
@@ -151,7 +146,6 @@ Notation "'κ'" := (κ P).
 Notation "'term'" := (term P).
 
 Notation "'dep'" := (dep P).
-Notation "'rf'" := (rf P).
 
 Notation "e1 ⊴ e2" := (dep e1 e2) (at level 14).
 
@@ -282,7 +276,6 @@ Record wf :=
 
     wf_ninEλ : forall e (NIN : ~ E e), λ e = def_action;
     wf_ninEκ : forall e (NIN : ~ E e), κ e ⇔ Formula.tt;
-    wf_rfE_  : rf ≡ ⦗E⦘ ⨾ rf ⨾ ⦗E⦘;
   }.
 
 Lemma wf_pt_family_subset (WF : wf) D C (EQ : C ⊆₁ D) ψ: τ C ψ ⊨ τ D ψ.
@@ -327,22 +320,12 @@ Qed.
 Record cand :=
   { cand_wf : wf;
 
-    cand_rf_injective : functional rf⁻¹;
-
-    (* C2a *)
-    cand_rf_matches : rf ⊆ λ ⋄ matches;
-
-    (* C2b *)
-    cand_rf_total : codom_rel rf ≡₁ R ∩₁ E;
-
     (* C3 *)
     cand_precondition : forall e, E e -> Formula.tautology (κ e);
 
     (* C5 *)
     cand_termination : Formula.tautology term;
 
-    (* C6 *)
-    cand_rf_dep : rf ⊆ dep;
   }.
 
 End Pomset.
@@ -354,7 +337,6 @@ Definition init_pomset : pomset :=
      τ := fun _ φ => φ;
      term   := Formula.tt;
      dep    := ∅₂;
-     rf     := ∅₂;
   |}.
 
 Lemma wf_init_pomset : wf init_pomset.
@@ -376,7 +358,6 @@ Definition local_initialized_pomset (regs : list Reg.t) : pomset :=
                         (fun ψ r => Formula.subst_reg ψ r (Expr.val 0)) regs φ;
       term   := Formula.ff;
       dep    := ∅₂;
-      rf     := ∅₂;
   |}.
 
 Add Morphism lconsistent with signature

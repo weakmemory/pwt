@@ -48,10 +48,6 @@ Let dep1 := dep P1.
 Let dep2 := dep P2.
 Let dep := dep P.
 
-Let rf1 := rf P1.
-Let rf2 := rf P2.
-Let rf := rf P.
-
 Notation "'R'" := (fun a => is_r' (λ a)).
 Notation "'W'" := (fun a => is_w' (λ a)).
 Notation "'F'" := (fun a => is_f' (λ a)).
@@ -60,8 +56,6 @@ Record pomset_union :=
   { events_union    : E ≡₁ E1 ∪₁ E2;
     dep_restr1      : restr_rel E1 dep    ≡ dep1;
     dep_restr2      : restr_rel E2 dep    ≡ dep2;
-    rf_restr1       : restr_rel E1 rf     ≡ rf1;
-    rf_restr2       : restr_rel E2 rf     ≡ rf2;
   }.
 
 Lemma dep_union (PU : pomset_union) : dep1 ∪ dep2 ⊆ dep.
@@ -70,11 +64,6 @@ Proof using.
   basic_solver.
 Qed.
 
-Lemma rf_union (PU : pomset_union) : rf1 ∪ rf2 ⊆ rf.
-Proof using.
-  rewrite <- rf_restr1, <- rf_restr2; auto.
-  basic_solver.
-Qed.
 
 Definition label_union := forall e, (E1 e -> λ e = λ1 e) /\ (E2 e -> λ e = λ2 e).
 
@@ -83,7 +72,6 @@ Record SKIP :=
     skip_pt     : forall D ψ, τ D ψ ⇔ ψ;
     skip_term   : term   ⇔ Formula.tt;
     skip_dep    : dep    ≡ ∅₂;
-    skip_rf     : rf     ≡ ∅₂;
     skip_κ      : forall e, κ e ⇔ Formula.tt;
     skip_λ      : forall e, λ e = def_action;
   }.
@@ -197,7 +185,6 @@ Record LETT (r : Reg.t) (m : Expr.t) :=
     let_pt     : forall D ψ, τ D ψ ⇔ Formula.subst_reg ψ r m;
     let_term   : term     ⇔ Formula.tt;
     let_dep    : dep      ≡ ∅₂;
-    let_rf     : rf       ≡ ∅₂;
     let_κ      : forall e, κ e ⇔ Formula.tt;
     let_noereg : Expr.no_eregs m;
     let_λ      : forall e, λ e = def_action;
@@ -228,7 +215,6 @@ Record FENCE (α : thread_id) (μ : mode) :=
                         else Formula.tt;
 
     fence_dep    : dep    ≡ ∅₂;
-    fence_rf     : rf     ≡ ∅₂;
   }.
 
 Let κE := Formula.disj_list (map κ E_list).
@@ -287,7 +273,6 @@ Record READ (α : thread_id) (r : Reg.t)
                       else Formula.tt;
 
   read_dep    : dep    ≡ ∅₂;
-  read_rf     : rf     ≡ ∅₂;
 
   read_ϕ_ereg : forall e, Formula.used_eregs (ϕ e) = nil;
 }.
@@ -326,7 +311,6 @@ Record WRITE (α : thread_id) (x : location)
   write_term : term ⇔ κE;
 
   write_dep    : dep    ≡ ∅₂;
-  write_rf     : rf     ≡ ∅₂;
 
   write_noereg : Expr.no_eregs m;
   write_sat    : forall e (IN : E e),
@@ -381,22 +365,20 @@ Inductive Semantics (α : thread_id) (s : Stmt.t) (P : pomset) : Prop :=
 Ltac pomset_big_simplifier :=
   match goal with
   | PE : SKIP _ |- _ =>
-    rewrite ?(skip_dep PE), ?(skip_rf PE),
+    rewrite ?(skip_dep PE),
             ?(skip_κ PE), ?(skip_λ PE)
   | PE : LETT _ _ _ |- _ =>
-    rewrite ?(let_dep PE), ?(let_rf PE),
+    rewrite ?(let_dep PE),
             ?(let_κ PE), ?(let_λ PE)
   | PE : READ _ _ _ _ _ _ _ |- _ =>
-    rewrite ?(read_dep PE), ?(read_rf PE),
+    rewrite ?(read_dep PE),
             ?(read_κ PE), ?(read_λ PE); unfold read_κ_def
   | PE : WRITE _ _ _ _ _ _ |- _ =>
     rewrite ?(write_dep PE),
-            ?(write_rf PE),
             ?(write_κ PE),
             ?(write_λ PE); unfold write_κ_def
   | PE : FENCE _ _ _ |- _ =>
     rewrite ?(fence_dep PE),
-            ?(fence_rf PE),
             ?(fence_κ PE),
             ?(fence_λ PE)
   end.

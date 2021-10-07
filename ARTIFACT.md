@@ -1,6 +1,6 @@
 # Artifact 56 for Evaluation for POPL'22
 
-There are two artefacts for this work, the Coq formalisation and the tool PwTer. Each is described in turn.
+There are two artifacts for this work, the Coq formalization and the tool PwTer. Each is described in turn.
 
 #### Quick links
 - Browse the development at GitHub: [online](https://github.com/weakmemory/pwt)

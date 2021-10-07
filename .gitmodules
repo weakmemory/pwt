@@ -1,0 +1,3 @@
+[submodule "pomsets-with-predicate-transformers"]
+	path = pomsets-with-predicate-transformers
+	url = git@github.com:graymalkin/pomsets-with-predicate-transformers.git

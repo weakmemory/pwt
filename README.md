@@ -3,7 +3,7 @@
 This repository contains Coq code supplementing the paper _Leaky Semicolon: Compositional Semantic Dependencies for Relaxed-Memory Concurrency_ by 
 Alan Jeffrey, James Riely, Mark Batty, Simon Cooksey, Ilya Kaysin, and Anton Podkopaev.
 
-## Building the Project
+## Building the Coq Formalisation
 
 ### Requirements
 * [Coq 8.13.1](https://coq.inria.fr)
@@ -40,3 +40,22 @@ To build the project just use `make -j` command (assuming all dependencies were 
 
 ### Auxiliary definitions and lemmas
 - `AuxDef.v`, `AuxRel.v`, `SeqBuilder.v`
+
+
+## Building PwTer
+
+All required dependencies can be installed via package manager [`opam`](https://opam.ocaml.org/). 
+```
+opam install dune batteries fmt menhir ocamlgraph ounit2 z3
+```
+
+### Building Manually
+
+To build PwTer, navigate to `~/artifact/pomsets-with-predicate-transformers/` and run `make`.
+
+
+### Run the tool
+
+To reproduce the results from the table in the paper, change directory to `~/artifact/pomsets-with-predicate-transformers` and run `make check`.
+
+To experiment with the tool in general, follow the instructions in `~/artifact/pomsets-with-predicate-transformers/README.md`.

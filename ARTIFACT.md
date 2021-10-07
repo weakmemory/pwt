@@ -1,13 +1,20 @@
-# Pomsets w/ Transformers (a Coq formalization)
+# Artifact 56 for Evaluation for POPL'22
+
+There are two artefacts for this work, the Coq formalisation and the tool PwTer. Each is described in turn.
+
+#### Quick links
+- Browse the development at GitHub: [online](https://github.com/weakmemory/pwt)
+- Browse the PwTer source code at GitHub: [online](https://github.com/graymalkin/pomsets-with-predicate-transformers)
+- VirtualBox image: [online](https://podkopaev.net/popl22-pwt-artifact.html)
+
+
+## Pomsets w/ Transformers (a Coq formalization)
 
 This artifact contains Coq code supplementing the paper _Leaky Semicolon: Compositional Semantic Dependencies for Relaxed-Memory Concurrency_ by 
 Alan Jeffrey, James Riely, Mark Batty, Simon Cooksey, Ilya Kaysin, and Anton Podkopaev.
 
-#### Quick links
-- Browse the development at GitHub: [online](https://github.com/weakmemory/pwt)
-- VirtualBox image: [online](https://podkopaev.net/popl22-pwt-artifact.html)
 
-## Getting started
+### Getting started
 The artifact consists of Coq formalization and proofs about _Pomsets w/ Transformers_.
 There are two ways to evaluate the artifact:
 - by using a virtual machine (VM) prepared by us;
@@ -72,9 +79,9 @@ grep dmit src/*.v
 
 ```
 
-## Description of the project's files
+### Description of the project's files
 
-### Basic definitions of the semantics
+#### Basic definitions of the semantics
 - `Events.v` – a definition of events (§4.1)
 - `Language.v` – definitions of statements _S_ and expressions _M_ (§4.1)
 - `Formula.v` – a language of formulas Φ (§4.1)
@@ -83,10 +90,35 @@ grep dmit src/*.v
 - `Pomset.v` — a definition of pomsets with predicate transformers (§4.3, Def. 4.4)
 - `Semantics.v` — the PwT semantics extended to allow if-closure (§4.3, Fig. 1 and §9.4, Def. 9.6)
 
-### Properties of the semantics
+#### Properties of the semantics
 - `SeqSkipId.v` — `skip` as an identity element for the semicolon operator (§4.3, Lemma 4.5a)
 - `SeqAssoc.v` — associativity of the semicolon operator (§4.3, Lemma 4.5b)
 - `IfClosure.v` — distribution of the if operator over semicolon (§4.3, Lemma 4.6e)
 
-### Auxiliary definitions and lemmas
+#### Auxiliary definitions and lemmas
 - `AuxDef.v`, `AuxRel.v`, `SeqBuilder.v`
+
+
+## PwTer
+
+PwTer can be found on the desktop of the virtual machine described above, by following the `PwTer` shortcut on the
+desktop. 
+
+Alternatively, it can be built on your own machine by following the instructions in [the
+project](https://github.com/graymalkin/pomsets-with-predicate-transformers)'s README. 
+
+Once the tool is built, to replicate the results presented in the paper, navigate to the `data` directory of the PwTer
+sources and run `make check`. This will evaluate the Java Causality Test Cases.
+
+### Tool structure
+
+Most of the source is boiler plate to tie together parsers, the two interesting files are:
+
+ - `src/Preliminaries.ml` contains the interface to Z3
+ - `src/PomsetPTSeq.ml` implements the semantics as presented in Figure 1, with register recycling. The paper's rules are referenced in comments like `(* M6 *)` and `(* R4a *)`.
+
+The tool has been written to be faithful to the mathematics without too much deviation for efficiency's sake. The
+majority of the complexity is in the implementation of `seq_rule` and `if_rule`, as these have to implement merging. In
+PwTer, all events have globally unique identifiers, so possible valid merges have to be calculated at these compositions
+and new labellings must be produced. This yields quite a lot of fiddly maps which have to be applied carefully to
+preserve the semantics.
